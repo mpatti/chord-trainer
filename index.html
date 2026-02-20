@@ -144,6 +144,12 @@
       'C4': 60, 'C#4': 61, 'D4': 62, 'D#4': 63, 'E4': 64, 'F4': 65, 'F#4': 66, 'G4': 67, 'G#4': 68, 'A4': 69, 'A#4': 70, 'B4': 71, 'C5': 72
     };
     
+    // Map flat notes to sharp equivalents for MIDI lookup
+    const flatToSharp = {
+      'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#',
+      'Cb': 'B', 'Fb': 'E', 'E#': 'F', 'B#': 'C'
+    };
+    
     // Piano keys: white keys are at fixed positions, black keys between them
     // C3 starts at left:0, each white key is 48px wide
     const WHITE_KEYS = [
@@ -187,7 +193,12 @@
       
       const playChord = (notes) => {
         if (!synth) return;
-        const midi = notes.map(n => noteToMidi[n + '4'] || 60);
+        const midi = notes.map(n => {
+          // Handle flats: Ab -> G#, then look up with octave
+          let noteName = n;
+          if (flatToSharp[n]) noteName = flatToSharp[n];
+          return noteToMidi[noteName + '4'] || 60;
+        });
         synth.triggerAttackRelease(midi, '1n');
       };
       
