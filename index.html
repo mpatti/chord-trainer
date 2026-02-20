@@ -138,17 +138,19 @@
     .piano {
       position: relative;
       display: flex;
+      height: 180px;
     }
     
     .white-key {
       width: 50px;
       height: 180px;
       background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
-      border: 1px solid #ccc;
+      border: 1px solid #999;
       border-radius: 0 0 5px 5px;
       cursor: pointer;
       position: relative;
       transition: all 0.1s;
+      box-sizing: border-box;
     }
     
     .white-key:hover {
@@ -163,16 +165,17 @@
     .black-key {
       width: 32px;
       height: 110px;
-      background: linear-gradient(180deg, #333 0%, #111 100%);
+      background: linear-gradient(180deg, #222 0%, #000 100%);
       position: absolute;
-      border-radius: 0 0 3px 3px;
+      border-radius: 0 0 4px 4px;
       cursor: pointer;
       z-index: 2;
       transition: all 0.1s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
     
     .black-key:hover {
-      background: linear-gradient(180deg, #444 0%, #222 100%);
+      background: linear-gradient(180deg, #333 0%, #111 100%);
     }
     
     .black-key.active {
@@ -626,21 +629,42 @@
             
             <div className="piano-container">
               <div className="piano">
-                {KEYBOARD_LAYOUT.filter(k => !k.isBlack).map((key) => (
-                  <div
-                    key={key.note}
-                    className={`white-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
-                    onClick={() => toggleNote(key.note)}
-                  />
-                ))}
-                {KEYBOARD_LAYOUT.filter(k => k.isBlack).map((key) => (
-                  <div
-                    key={key.note || key.name}
-                    className={`black-key ${selectedNotes.includes(key.note || key.name) ? 'active' : ''}`}
-                    style={{ left: key.left + 10 + 'px' }}
-                    onClick={() => toggleNote(key.note || key.name)}
-                  />
-                ))}
+                {KEYBOARD_LAYOUT.map((key, index) => {
+                  if (key.isBlack) return null;
+                  // Find the index of this white key among white keys
+                  const whiteKeyIndex = KEYBOARD_LAYOUT.slice(0, index).filter(k => !k.isBlack).length;
+                  const leftPos = whiteKeyIndex * 51; // 50px + 1px border
+                  
+                  return (
+                    <div
+                      key={key.note}
+                      className={`white-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
+                      style={{ left: leftPos + 'px' }}
+                      onClick={() => toggleNote(key.note)}
+                    />
+                  );
+                })}
+                {KEYBOARD_LAYOUT.map((key, index) => {
+                  if (!key.isBlack) return null;
+                  // Find the index of the previous white key
+                  let prevWhiteIndex = 0;
+                  for (let i = index - 1; i >= 0; i--) {
+                    if (!KEYBOARD_LAYOUT[i].isBlack) {
+                      prevWhiteIndex = KEYBOARD_LAYOUT.slice(0, i).filter(k => !k.isBlack).length;
+                      break;
+                    }
+                  }
+                  const leftPos = (prevWhiteIndex * 51) + 35; // Position between white keys
+                  
+                  return (
+                    <div
+                      key={key.note}
+                      className={`black-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
+                      style={{ left: leftPos + 'px' }}
+                      onClick={() => toggleNote(key.note)}
+                    />
+                  );
+                })}
               </div>
             </div>
             
