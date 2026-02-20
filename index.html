@@ -629,42 +629,35 @@
             
             <div className="piano-container">
               <div className="piano">
-                {KEYBOARD_LAYOUT.map((key, index) => {
-                  if (key.isBlack) return null;
-                  // Find the index of this white key among white keys
-                  const whiteKeyIndex = KEYBOARD_LAYOUT.slice(0, index).filter(k => !k.isBlack).length;
-                  const leftPos = whiteKeyIndex * 51; // 50px + 1px border
-                  
-                  return (
-                    <div
-                      key={key.note}
-                      className={`white-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
-                      style={{ left: leftPos + 'px' }}
-                      onClick={() => toggleNote(key.note)}
-                    />
-                  );
-                })}
-                {KEYBOARD_LAYOUT.map((key, index) => {
-                  if (!key.isBlack) return null;
-                  // Find the index of the previous white key
-                  let prevWhiteIndex = 0;
-                  for (let i = index - 1; i >= 0; i--) {
-                    if (!KEYBOARD_LAYOUT[i].isBlack) {
-                      prevWhiteIndex = KEYBOARD_LAYOUT.slice(0, i).filter(k => !k.isBlack).length;
-                      break;
-                    }
-                  }
-                  const leftPos = (prevWhiteIndex * 51) + 35; // Position between white keys
-                  
-                  return (
-                    <div
-                      key={key.note}
-                      className={`black-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
-                      style={{ left: leftPos + 'px' }}
-                      onClick={() => toggleNote(key.note)}
-                    />
-                  );
-                })}
+                {/* White keys - C to C (2 octaves) */}
+                {['C3','D3','E3','F3','G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5'].map((note, idx) => (
+                  <div
+                    key={note}
+                    className={`white-key ${selectedNotes.includes(note) ? 'active' : ''}`}
+                    style={{ left: idx * 51 + 'px' }}
+                    onClick={() => toggleNote(note)}
+                  />
+                ))}
+                {/* Black keys - positioned correctly between white keys */}
+                {[
+                  { note: 'C#3', whiteIdx: 0 },
+                  { note: 'D#3', whiteIdx: 1 },
+                  { note: 'F#3', whiteIdx: 3 },
+                  { note: 'G#3', whiteIdx: 4 },
+                  { note: 'A#3', whiteIdx: 5 },
+                  { note: 'C#4', whiteIdx: 7 },
+                  { note: 'D#4', whiteIdx: 8 },
+                  { note: 'F#4', whiteIdx: 10 },
+                  { note: 'G#4', whiteIdx: 11 },
+                  { note: 'A#4', whiteIdx: 12 },
+                ].map(({ note, whiteIdx }) => (
+                  <div
+                    key={note}
+                    className={`black-key ${selectedNotes.includes(note) ? 'active' : ''}`}
+                    style={{ left: (whiteIdx * 51) + 34 + 'px' }}
+                    onClick={() => toggleNote(note)}
+                  />
+                ))}
               </div>
             </div>
             
