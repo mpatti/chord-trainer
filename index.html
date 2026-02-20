@@ -88,7 +88,7 @@
     
     // Chord definitions by level - simplified
     const CHORDS = {
-      1: [  // Major triads
+      1: [  // All triads (major + minor)
         { name: 'C', notes: ['C', 'E', 'G'] },
         { name: 'Am', notes: ['A', 'C', 'E'] },
         { name: 'F', notes: ['F', 'A', 'C'] },
@@ -97,16 +97,12 @@
         { name: 'Em', notes: ['E', 'G', 'B'] },
         { name: 'D', notes: ['D', 'F#', 'A'] },
         { name: 'E', notes: ['E', 'G#', 'B'] },
-      ],
-      2: [  // Minor triads
         { name: 'Cm', notes: ['C', 'Eb', 'G'] },
         { name: 'Fm', notes: ['F', 'Ab', 'C'] },
         { name: 'Gm', notes: ['G', 'Bb', 'D'] },
         { name: 'Bm', notes: ['B', 'D', 'F#'] },
-        { name: 'Em', notes: ['E', 'G', 'B'] },
-        { name: 'Am', notes: ['A', 'C', 'E'] },
       ],
-      3: [  // 7th chords (Maj7, Min7, Dom7)
+      2: [  // 7th chords (Maj7, Min7, Dom7)
         { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
         { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] },
         { name: 'Gmaj7', notes: ['G', 'B', 'D', 'F#'] },
@@ -120,7 +116,7 @@
         { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
         { name: 'A7', notes: ['A', 'C#', 'E', 'G'] },
       ],
-      4: [  // 9th chords + Altered dominants
+      3: [  // 9th chords + Altered dominants
         { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
         { name: 'Dm9', notes: ['D', 'F', 'A', 'C', 'E'] },
         { name: 'Em9', notes: ['E', 'G', 'B', 'D', 'F#'] },
@@ -131,7 +127,7 @@
         { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'Bb', 'B'] },
         { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] },
       ],
-      5: [  // Extended + Half diminished
+      4: [  // Extended + Half diminished
         { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'F', 'A'] },
         { name: 'Dm13', notes: ['D', 'F', 'A', 'C', 'E', 'G', 'B'] },
         { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
@@ -167,7 +163,7 @@
     const ALL_KEYS = [...WHITE_KEYS, ...BLACK_KEYS];
     
     function getChord(level) {
-      const chords = CHORDS[Math.min(level, 5)] || CHORDS[1];
+      const chords = CHORDS[Math.min(level, 4)] || CHORDS[1];
       return chords[Math.floor(Math.random() * chords.length)];
     }
     
