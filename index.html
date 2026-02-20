@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chord Theory Trainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0a0a0f;
+      --card: #1a1a24;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.3);
+      --success: #22c55e;
+      --error: #ef4444;
+      --text: #f8fafc;
+      --text-secondary: #94a3b8;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .streak {
+      color: #f59e0b;
+    }
+    
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 0;
+    }
+    
+    .challenge-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .level-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    .chord-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 4rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px var(--accent-glow);
+    }
+    
+    .chord-hint {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .piano-container {
+      display: flex;
+      justify-content: center;
+      margin: 30px 0;
+      user-select: none;
+    }
+    
+    .piano {
+      position: relative;
+      display: flex;
+    }
+    
+    .white-key {
+      width: 50px;
+      height: 180px;
+      background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+      border: 1px solid #ccc;
+      border-radius: 0 0 5px 5px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.1s;
+    }
+    
+    .white-key:hover {
+      background: linear-gradient(180deg, #f8f8f8 0%, #e8e8e8 100%);
+    }
+    
+    .white-key.active {
+      background: linear-gradient(180deg, var(--accent) 0%, #4f46e5 100%);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    
+    .black-key {
+      width: 32px;
+      height: 110px;
+      background: linear-gradient(180deg, #333 0%, #111 100%);
+      position: absolute;
+      border-radius: 0 0 3px 3px;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.1s;
+    }
+    
+    .black-key:hover {
+      background: linear-gradient(180deg, #444 0%, #222 100%);
+    }
+    
+    .black-key.active {
+      background: linear-gradient(180deg, var(--accent) 0%, #4f46e5 100%);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    button {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      padding: 12px 30px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #4f46e5;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px var(--accent-glow);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.15);
+    }
+    
+    .feedback-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .feedback-card {
+      background: var(--card);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      animation: slideUp 0.3s;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .feedback-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+    
+    .feedback-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    
+    .feedback-title.correct { color: var(--success); }
+    .feedback-title.wrong { color: var(--error); }
+    
+    .feedback-explanation {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    .correct-notes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .note-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--accent);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-weight: 600;
+    }
+    
+    .progress-section {
+      margin-top: 30px;
+    }
+    
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a855f7);
+      transition: width 0.5s;
+    }
+    
+    .progress-text {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    
+    .audio-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 5px 20px var(--accent-glow);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+    
+    // Music theory data
+    const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const NOTE_DISPLAY = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    
+    const CHORD_PROGRESSIONS = {
+      1: { // Major/minor triads
+        chords: [
+          { name: 'C', notes: ['C', 'E', 'G'] },
+          { name: 'Am', notes: ['A', 'C', 'E'] },
+          { name: 'F', notes: ['F', 'A', 'C'] },
+          { name: 'G', notes: ['G', 'B', 'D'] },
+          { name: 'Dm', notes: ['D', 'F', 'A'] },
+          { name: 'Em', notes: ['E', 'G', 'B'] },
+          { name: 'D', notes: ['D', 'F#', 'A'] },
+          { name: 'E', notes: ['E', 'G#', 'B'] },
+        ]
+      },
+      2: {
+        chords: [
+          { name: 'Cm', notes: ['C', 'Eb', 'G'] },
+          { name: 'Fm', notes: ['F', 'Ab', 'C'] },
+          { name: 'Gm', notes: ['G', 'Bb', 'D'] },
+          { name: 'Bb', notes: ['Bb', 'D', 'F'] },
+          { name: 'Eb', notes: ['Eb', 'G', 'Bb'] },
+          { name: 'Ab', notes: ['Ab', 'C', 'Eb'] },
+        ]
+      },
+      3: {
+        chords: [
+          { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
+          { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] },
+          { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
+          { name: 'Am7', notes: ['A', 'C', 'E', 'G'] },
+          { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] },
+          { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
+        ]
+      },
+      4: {
+        chords: [
+          { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
+          { name: 'Fm7', notes: ['F', 'Ab', 'C', 'Eb'] },
+          { name: 'Gm7', notes: ['G', 'Bb', 'D', 'F'] },
+          { name: 'Am7', notes: ['A', 'C', 'E', 'G'] },
+          { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] },
+          { name: 'Em7', notes: ['E', 'G', 'B', 'D'] },
+        ]
+      },
+      5: {
+        chords: [
+          { name: 'C9', notes: ['C', 'E', 'G', 'B', 'D'] },
+          { name: 'Dm9', notes: ['D', 'F', 'A', 'C', 'E'] },
+          { name: 'Fmaj9', notes: ['F', 'A', 'C', 'E', 'G'] },
+          { name: 'G9', notes: ['G', 'B', 'D', 'F', 'A'] },
+        ]
+      },
+      6: {
+        chords: [
+          { name: 'Cm11', notes: ['C', 'Eb', 'G', 'Bb', 'D', 'F'] },
+          { name: 'Fm11', notes: ['F', 'Ab', 'C', 'Eb', 'G', 'A'] },
+          { name: 'Dm11', notes: ['D', 'F', 'A', 'C', 'E', 'G'] },
+        ]
+      },
+      7: {
+        chords: [
+          { name: 'C13', notes: ['C', 'E', 'G', 'B', 'D', 'F', 'A'] },
+          { name: 'Fm13', notes: ['F', 'A', 'C', 'E', 'G', 'Bb', 'D'] },
+        ]
+      },
+      8: {
+        chords: [
+          { name: 'C7b9', notes: ['C', 'E', 'G', 'Bb', 'Db'] },
+          { name: 'F7#11', notes: ['F', 'A', 'C', 'E', 'G', 'Bb', 'B'] },
+          { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
+          { name: 'C#m7b5', notes: ['C#', 'E', 'G', 'B'] },
+        ]
+      },
+      9: {
+        chords: [
+          { name: 'Ab13', notes: ['Ab', 'C', 'Eb', 'G', 'Bb', 'Db', 'F'] },
+          { name: 'Db7#11', notes: ['Db', 'F', 'Ab', 'Cb', 'Eb', 'G', 'A'] },
+        ]
+      },
+      10: {
+        chords: [
+          { name: 'C7#9', notes: ['C', 'E', 'G', 'Bb', 'D#'] },
+          { name: 'F7b13', notes: ['F', 'A', 'C', 'Eb', 'Gb', 'Db'] },
+          { name: 'Bbmaj7#11', notes: ['Bb', 'D', 'F', 'A', 'C', 'E', 'F#'] },
+        ]
+      }
+    };
+    
+    // Piano key layout (2 octaves)
+    const KEYBOARD_LAYOUT = [
+      { note: 'C3', isBlack: false, left: 0 },
+      { note: 'C#3', isBlack: true, left: 35 },
+      { note: 'D3', isBlack: false, left: 70 },
+      { note: 'D#3', isBlack: true, left: 105 },
+      { note: 'E3', isBlack: false, left: 140 },
+      { note: 'F3', isBlack: false, left: 175 },
+      { note: 'F#3', isBlack: true, left: 210 },
+      { note: 'G3', isBlack: false, left: 245 },
+      { note: 'G#3', isBlack: true, left: 280 },
+      { note: 'A3', isBlack: false, left: 315 },
+      { note: 'A#3', isBlack: true, left: 350 },
+      { note: 'B3', isBlack: false, left: 385 },
+      { note: 'C4', isBlack: false, left: 420 },
+      { note: 'C#4', isBlack: true, left: 455 },
+      { note: 'D4', isBlack: false, left: 490 },
+      { note: 'D#4', isBlack: true, left: 525 },
+      { note: 'E4', isBlack: false, left: 560 },
+      { note: 'F4', isBlack: false, left: 595 },
+      { note: 'F#4', isBlack: true, left: 630 },
+      { note: 'G4', isBlack: false, left: 665 },
+      { note: 'G#4', isBlack: true, left: 700 },
+      { note: 'A4', isBlack: false, left: 735 },
+      { note: 'A#4', isBlack: true, left: 770 },
+      { note: 'B4', isBlack: false, left: 805 },
+      { note: 'C5', isBlack: false, left: 840 },
+    ];
+    
+    const noteToMidi = {
+      'C3': 48, 'C#3': 49, 'D3': 50, 'D#3': 51, 'E3': 52, 'F3': 53,
+      'F#3': 54, 'G3': 55, 'G#3': 56, 'A3': 57, 'A#3': 58, 'B3': 59,
+      'C4': 60, 'C#4': 61, 'D4': 62, 'D#4': 63, 'E4': 64, 'F4': 65,
+      'F#4': 66, 'G4': 67, 'G#4': 68, 'A4': 69, 'A#4': 70, 'B4': 71,
+      'C5': 72
+    };
+    
+    // Game state
+    function getChordForLevel(level) {
+      const levelKey = Math.min(level, 10);
+      const chords = CHORD_PROGRESSIONS[levelKey].chords;
+      return chords[Math.floor(Math.random() * chords.length)];
+    }
+    
+    function getExplanation(chordName, selectedNotes, correctNotes) {
+      const explanations = {
+        'Cm7b5': `Cm7b5 = C - Eb - Gb - Bb. The "b5" means flat the 5th (G becomes Gb)!`,
+        'Bm7b5': `Bm7b5 = B - D - F - A. This is a half-diminished chord!`,
+        'Cmaj7': `Cmaj7 = C - E - G - B. Major 7th = root + major triad + major 7th above.`,
+        'Dm7': `Dm7 = D - F - A - C. Minor 7th = root + minor triad + minor 7th above.`,
+        'Cm7': `Cm7 = C - Eb - G - Bb. Minor 7th = root + minor triad + minor 7th above.`,
+        'Dm9': `Dm9 = D - F - A - C - E. The 9th is the same as the 2nd, just an octave up!`,
+        'Fm11': `Fm11 = F - Ab - C - Eb - G - A. The 11th is the same as the 4th!`,
+        'C7b9': `C7b9 = C - E - G - Bb - Db. The b9 creates tension that wants to resolve.`,
+        'F7#11': `F7#11 = F - A - C - Eb - G - Bb - B. The #11 is the same as #4!`,
+        'C7#9': `C7#9 = C - E - G - Bb - D#. The #9 sounds like a blue note!`,
+        'F7b13': `F7b13 = F - A - C - Eb - Gb - Db. The b13 is the same as the b6!`,
+        'Bbmaj7#11': `Bbmaj7#11 = Bb - D - F - A - C - E - F#. The #11 creates a Lydian sound!`
+      };
+      
+      if (explanations[chordName]) return explanations[chordName];
+      
+      return `This chord is built from the root plus the specified intervals. Make sure you have all the right notes!`;
+    }
+    
+    function App() {
+      const [level, setLevel] = useState(1);
+      const [xp, setXp] = useState(0);
+      const [streak, setStreak] = useState(0);
+      const [currentChord, setCurrentChord] = useState(null);
+      const [selectedNotes, setSelectedNotes] = useState([]);
+      const [showFeedback, setShowFeedback] = useState(false);
+      const [isCorrect, setIsCorrect] = useState(false);
+      const [questionsAnswered, setQuestionsAnswered] = useState(0);
+      const [questionsCorrect, setQuestionsCorrect] = useState(0);
+      const [synthReady, setSynthReady] = useState(false);
+      const [synth, setSynth] = useState(null);
+      
+      // Initialize synth
+      useEffect(() => {
+        const initSynth = async () => {
+          await Tone.start();
+          const s = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: 'triangle' },
+            envelope: { attack: 0.02, decay: 0.3, sustain: 0.4, release: 0.8 }
+          }).toDestination();
+          setSynth(s);
+          setSynthReady(true);
+        };
+        initSynth();
+      }, []);
+      
+      // Generate first chord
+      useEffect(() => {
+        if (!currentChord) {
+          setCurrentChord(getChordForLevel(level));
+        }
+      }, [level]);
+      
+      const playChord = (notes) => {
+        if (!synth || !synthReady) return;
+        const midiNotes = notes.map(n => {
+          const baseNote = n.replace(/\d/g, '');
+          const octave = n.match(/\d/)?.[0] || '4';
+          return noteToMidi[baseNote + octave] || 60;
+        });
+        synth.triggerAttackRelease(midiNotes, '1n');
+      };
+      
+      const toggleNote = (note) => {
+        if (selectedNotes.includes(note)) {
+          setSelectedNotes(selectedNotes.filter(n => n !== note));
+        } else {
+          setSelectedNotes([...selectedNotes, note]);
+        }
+      };
+      
+      const handleSubmit = () => {
+        if (!currentChord) return;
+        
+        // Normalize notes for comparison
+        const selected = selectedNotes.map(n => n.replace(/\d/g, '').replace('b', 'b').replace('#', '#'));
+        const correct = currentChord.notes;
+        
+        const correctCount = correct.filter(note => selected.includes(note)).length;
+        const isCorrectNow = correctCount === correct.length && selected.length === correct.length;
+        
+        setIsCorrect(isCorrectNow);
+        setShowFeedback(true);
+        
+        if (isCorrectNow) {
+          setStreak(streak + 1);
+          setXp(xp + 10 + streak * 2);
+          setQuestionsCorrect(questionsCorrect + 1);
+        } else {
+          setStreak(0);
+        }
+        
+        setQuestionsAnswered(questionsAnswered + 1);
+        
+        // Play the chord
+        if (isCorrectNow) {
+          playChord(currentChord.notes.map(n => n + '4'));
+        }
+      };
+      
+      const handleNext = () => {
+        setShowFeedback(false);
+        setSelectedNotes([]);
+        
+        // Check for level up
+        if (questionsAnswered > 0 && questionsAnswered % 5 === 0) {
+          if (questionsCorrect >= 4) {
+            setLevel(level + 1);
+          }
+          setQuestionsCorrect(0);
+        }
+        
+        setCurrentChord(getChordForLevel(level));
+      };
+      
+      const handlePlayPreview = () => {
+        if (currentChord) {
+          playChord(currentChord.notes.map(n => n + '4'));
+        }
+      };
+      
+      const progress = ((questionsAnswered % 5) / 5) * 100;
+      
+      return (
+        <div className="container">
+          <header>
+            <h1>🎹 Chord Theory Trainer</h1>
+            <div className="stats">
+              <div className="stat">
+                <div className="stat-value">{xp}</div>
+                <div className="stat-label">XP</div>
+              </div>
+              <div className="stat">
+                <div className="stat-value streak">🔥 {streak}</div>
+                <div className="stat-label">Streak</div>
+              </div>
+            </div>
+          </header>
+          
+          <main>
+            <div className="challenge-card">
+              <div className="level-badge">Level {level}</div>
+              <div className="chord-name">{currentChord?.name || '???'}</div>
+              <div className="chord-hint">Select all the notes in this chord</div>
+            </div>
+            
+            <div className="piano-container">
+              <div className="piano">
+                {KEYBOARD_LAYOUT.filter(k => !k.isBlack).map((key) => (
+                  <div
+                    key={key.note}
+                    className={`white-key ${selectedNotes.includes(key.note) ? 'active' : ''}`}
+                    onClick={() => toggleNote(key.note)}
+                  />
+                ))}
+                {KEYBOARD_LAYOUT.filter(k => k.isBlack).map((key) => (
+                  <div
+                    key={key.note || key.name}
+                    className={`black-key ${selectedNotes.includes(key.note || key.name) ? 'active' : ''}`}
+                    style={{ left: key.left + 10 + 'px' }}
+                    onClick={() => toggleNote(key.note || key.name)}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="controls">
+              <button className="btn-secondary" onClick={() => setSelectedNotes([])}>
+                Clear
+              </button>
+              <button className="btn-secondary" onClick={handlePlayPreview} disabled={!synthReady}>
+                🔊 Preview Chord
+              </button>
+              <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>
+                Submit
+              </button>
+            </div>
+            
+            <div className="progress-section">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: progress + '%' }}></div>
+              </div>
+              <div className="progress-text">
+                {questionsAnswered % 5} / 5 to level up • {questionsCorrect} correct this level
+              </div>
+            </div>
+          </main>
+          
+          {showFeedback && (
+            <div className="feedback-overlay" onClick={handleNext}>
+              <div className="feedback-card">
+                <div className="feedback-icon">{isCorrect ? '✅' : '❌'}</div>
+                <div className={`feedback-title ${isCorrect ? 'correct' : 'wrong'}`}>
+                  {isCorrect ? 'Correct!' : 'Not quite!'}
+                </div>
+                {!isCorrect && (
+                  <>
+                    <div className="correct-notes">
+                      {currentChord?.notes.map(note => (
+                        <span key={note} className="note-tag">{note}</span>
+                      ))}
+                    </div>
+                    <div className="feedback-explanation">
+                      {getExplanation(currentChord?.name, selectedNotes, currentChord?.notes)}
+                    </div>
+                  </>
+                )}
+                <button className="btn-primary" onClick={handleNext}>
+                  {questionsAnswered % 5 === 4 ? 'Finish Level' : 'Next Chord'}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          <button className="audio-btn" onClick={handlePlayPreview} title="Play chord sound">
+            🔊
+          </button>
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
