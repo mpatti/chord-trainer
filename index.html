@@ -86,33 +86,78 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
     
-    // Chord definitions by level
+    // Chord definitions by level - CORRECT notes
     const CHORDS = {
-      1: [
+      1: [  // Major triads
         { name: 'C', notes: ['C', 'E', 'G'] },
         { name: 'Am', notes: ['A', 'C', 'E'] },
         { name: 'F', notes: ['F', 'A', 'C'] },
         { name: 'G', notes: ['G', 'B', 'D'] },
         { name: 'Dm', notes: ['D', 'F', 'A'] },
+        { name: 'Em', notes: ['E', 'G', 'B'] },
+        { name: 'D', notes: ['D', 'F#', 'A'] },
+        { name: 'E', notes: ['E', 'G#', 'B'] },
       ],
-      2: [
+      2: [  // Minor triads
         { name: 'Cm', notes: ['C', 'Eb', 'G'] },
         { name: 'Fm', notes: ['F', 'Ab', 'C'] },
         { name: 'Gm', notes: ['G', 'Bb', 'D'] },
+        { name: 'Bm', notes: ['B', 'D', 'F#'] },
+        { name: 'Em', notes: ['E', 'G', 'B'] },
+        { name: 'Am', notes: ['A', 'C', 'E'] },
       ],
-      3: [
+      3: [  // Major 7th
         { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
-        { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] },
-        { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
+        { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] },
+        { name: 'Gmaj7', notes: ['G', 'B', 'D', 'F#'] },
+        { name: 'Dmaj7', notes: ['D', 'F#', 'A', 'C#'] },
+        { name: 'Emaj7', notes: ['E', 'G#', 'B', 'D#'] },
+        { name: 'Amaj7', notes: ['A', 'C#', 'E', 'G#'] },
       ],
-      4: [
+      4: [  // Minor 7th
         { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
         { name: 'Fm7', notes: ['F', 'Ab', 'C', 'Eb'] },
         { name: 'Gm7', notes: ['G', 'Bb', 'D', 'F'] },
+        { name: 'Bm7', notes: ['B', 'D', 'F#', 'A'] },
+        { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] },
+        { name: 'Em7', notes: ['E', 'G', 'B', 'D'] },
       ],
-      5: [
-        { name: 'C9', notes: ['C', 'E', 'G', 'B', 'D'] },
+      5: [  // Dominant 7th
+        { name: 'C7', notes: ['C', 'E', 'G', 'Bb'] },
+        { name: 'F7', notes: ['F', 'A', 'C', 'Eb'] },
+        { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
+        { name: 'A7', notes: ['A', 'C#', 'E', 'G'] },
+        { name: 'B7', notes: ['B', 'D#', 'F#', 'A'] },
+      ],
+      6: [  // 9th chords
+        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
         { name: 'Dm9', notes: ['D', 'F', 'A', 'C', 'E'] },
+        { name: 'Em9', notes: ['E', 'G', 'B', 'D', 'F#'] },
+        { name: 'Fm9', notes: ['F', 'Ab', 'C', 'Eb', 'G'] },
+        { name: 'Gm9', notes: ['G', 'Bb', 'D', 'F', 'A'] },
+      ],
+      7: [  // 11th chords
+        { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
+        { name: 'Dm11', notes: ['D', 'F', 'A', 'C', 'E', 'G'] },
+        { name: 'Fm11', notes: ['F', 'Ab', 'C', 'Eb', 'G', 'A'] },
+        { name: 'Gm11', notes: ['G', 'Bb', 'D', 'F', 'A', 'B'] },
+      ],
+      8: [  // 13th chords
+        { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'F', 'A'] },
+        { name: 'Dm13', notes: ['D', 'F', 'A', 'C', 'E', 'G', 'B'] },
+        { name: 'Fm13', notes: ['F', 'Ab', 'C', 'Eb', 'G', 'A', 'D'] },
+      ],
+      9: [  // Altered dominants
+        { name: 'C7b9', notes: ['C', 'E', 'G', 'Bb', 'Db'] },
+        { name: 'C7#9', notes: ['C', 'E', 'G', 'Bb', 'D#'] },
+        { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'Bb', 'B'] },
+        { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] },
+      ],
+      10: [  // Half diminished
+        { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
+        { name: 'Cm7b5', notes: ['C', 'Eb', 'Gb', 'Bb'] },
+        { name: 'Dm7b5', notes: ['D', 'F', 'Ab', 'C'] },
+        { name: 'Fm7b5', notes: ['F', 'Ab', 'Cb', 'Eb'] },
       ]
     };
     
@@ -141,7 +186,7 @@
     const ALL_KEYS = [...WHITE_KEYS, ...BLACK_KEYS];
     
     function getChord(level) {
-      const chords = CHORDS[Math.min(level, 5)] || CHORDS[1];
+      const chords = CHORDS[Math.min(level, 10)] || CHORDS[1];
       return chords[Math.floor(Math.random() * chords.length)];
     }
     
