@@ -535,7 +535,7 @@
         if (!playerName.trim()) return;
         const { error } = await supabase
           .from('leaderboard')
-          .insert([{ player_name: playerName, score: score, streak: streak, level: selectedDifficulty }]);
+          .insert([{ player_name: playerName, score: score, level: selectedDifficulty }]);
         if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
