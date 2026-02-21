@@ -305,9 +305,9 @@
     };
     
     function App() {
-      const [level, setLevel] = useState(1);
+      const [selectedDifficulty, setSelectedDifficulty] = useState(1);
       const [streak, setStreak] = useState(0);
-      const [currentChord, setCurrentChord] = useState(() => getChord(1));
+      const [currentChord, setCurrentChord] = useState(() => getChord(1, ''));
       const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
@@ -319,7 +319,6 @@
       const [scoreSaved, setScoreSaved] = useState(false);
       const [gameEnded, setGameEnded] = useState(false);
       const [gameStarted, setGameStarted] = useState(false);
-      const [showLevelUp, setShowLevelUp] = useState(false);
       
       useEffect(() => {
         Tone.start().then(() => {
@@ -380,22 +379,12 @@
           setShowCorrectFlash(true);
           setTimeout(() => setShowCorrectFlash(false), 800);
           
-          // Level up every 8 correct answers
-          if ((newStreak) % 8 === 0) {
-            const newLevel = level + 1;
-            setLevel(newLevel);
-            setShowLevelUp(true);
-            // Also advance to next chord pool immediately
-            setLastChordName(currentChord.name);
-            setCurrentChord(getChord(newLevel, currentChord.name));
-          }
-          
           playChord(currentChord.notes);
           // Auto-advance after 0.8 seconds
           setTimeout(() => {
             setSelectedNotes([]);
             setLastChordName(currentChord.name);
-            setCurrentChord(getChord(level + 1, currentChord.name));
+            setCurrentChord(getChord(selectedDifficulty, currentChord.name));
           }, 800);
         } else {
           setShowFeedback(true);
@@ -409,7 +398,7 @@
         setShowFeedback(false);
         setSelectedNotes([]);
         setLastChordName(currentChord.name);
-        setCurrentChord(getChord(level + 1, currentChord.name));
+        setCurrentChord(getChord(selectedDifficulty, currentChord.name));
       };
       
       const startGame = () => {
@@ -419,11 +408,7 @@
         }
       };
       
-      const closeLevelUp = () => {
-        setShowLevelUp(false);
-      };
-      
-      const currentLevel = Math.min(level, 5);
+      const currentLevel = selectedDifficulty;
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
       
@@ -458,17 +443,12 @@
       };
       
       const restartGame = () => {
-        setLevel(1);
-        setXp(0);
         setStreak(0);
-        setQuestionsAnswered(0);
-        setQuestionsCorrect(0);
-        setCurrentChord(getChord(1));
+        setCurrentChord(getChord(selectedDifficulty));
         setSelectedNotes([]);
         setShowFeedback(false);
         setGameEnded(false);
         setScoreSaved(false);
-        setPlayerName('');
         setShowLeaderboard(false);
       };
       
@@ -484,18 +464,27 @@
             <main>
               <div className="start-screen">
                 <div className="start-title">🎹 Chord Theory Trainer</div>
-                <div className="start-subtitle">Learn music theory by building chords!</div>
+                <div className="start-subtitle">Choose your difficulty and get the highest streak!</div>
                 <input
                   type="text"
                   className="start-input"
                   placeholder="Enter your name"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && startGame()}
                   maxLength={20}
                 />
+                <div style={{marginTop: '20px'}}>
+                  <div style={{color: 'var(--text-secondary)', marginBottom: '10px'}}>Select Difficulty:</div>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(1)} style={selectedDifficulty === 1 ? {borderColor: 'var(--accent)'} : {}}>Level 1: Triads (Beginner)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(2)} style={selectedDifficulty === 2 ? {borderColor: 'var(--accent)'} : {}}>Level 2: 7ths (Intermediate)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(3)} style={selectedDifficulty === 3 ? {borderColor: 'var(--accent)'} : {}}>Level 3: Altered + Half-Dim (Advanced)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(4)} style={selectedDifficulty === 4 ? {borderColor: 'var(--accent)'} : {}}>Level 4: All Types (Expert)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(5)} style={selectedDifficulty === 5 ? {borderColor: 'var(--accent)'} : {}}>Level 5: Scale Degrees</button>
+                  </div>
+                </div>
                 <br />
-                <button className="btn-primary start-btn" onClick={startGame}>
+                <button className="btn-primary start-btn" onClick={startGame} disabled={!playerName.trim()}>
                   Start Game 🚀
                 </button>
               </div>
@@ -513,14 +502,13 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
-              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">{LEVEL_NAMES[currentLevel]}</div></div>
-              <div className="stat"><div className="stat-value streak">🔥 {streak}</div><div className="stat-label">Streak</div></div>
+              <div className="stat"><div className="stat-value">{streak}</div><div className="stat-label">🔥 Streak</div></div>
             </div>
           </header>
           
           <main>
             <div className="challenge-card">
-              <div className="level-badge">{LEVEL_NAMES[currentLevel]} - {LEVEL_DESCRIPTIONS[currentLevel]}</div>
+              <div className="level-badge">{LEVEL_NAMES[selectedDifficulty]} - {LEVEL_DESCRIPTIONS[selectedDifficulty]}</div>
               <div className="chord-name">{currentChord?.name}</div>
               <div className="chord-hint">Select all the notes in this chord</div>
             </div>
@@ -541,13 +529,6 @@
             <div className="controls">
               <button className="btn-secondary" onClick={() => setSelectedNotes([])}>Clear</button>
               <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>Submit</button>
-            </div>
-            
-            <div className="progress-section">
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: ((streak % 8) / 8 * 100) + '%' }}></div>
-              </div>
-              <div className="progress-text">{streak % 8}/8 to next level</div>
             </div>
           </main>
           
@@ -617,17 +598,6 @@
                     Play Again
                   </button>
                 )}
-              </div>
-            </div>
-          )}
-          
-          {showLevelUp && (
-            <div className="celebration-overlay" onClick={closeLevelUp}>
-              <div className="celebration-card">
-                <div className="celebration-emojis">🎉🎊🎉</div>
-                <div className="celebration-title">LEVEL UP!</div>
-                <div className="celebration-level">You completed {LEVEL_NAMES[currentLevel]} - Now onto {LEVEL_NAMES[currentLevel + 1]}!</div>
-                <button className="btn-primary" onClick={closeLevelUp}>Awesome! 🚀</button>
               </div>
             </div>
           )}
