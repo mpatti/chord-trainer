@@ -338,6 +338,8 @@
       };
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
+      
+      const fetchLeaderboard = async () => {
         const { data, error } = await supabase
           .from('leaderboard')
           .select('*')
