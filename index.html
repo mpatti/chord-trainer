@@ -586,7 +586,7 @@
                     <div key={entry.id} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
                       <span style={{color: 'var(--accent)'}}>#{i+1}</span>
                       <span style={{flex: 1, paddingLeft: '10px'}}>{entry.player_name}</span>
-                      <span style={{fontWeight: '600'}}>⭐ {entry.score} (🔥 {entry.streak || entry.score})</span>
+                      <span style={{fontWeight: '600'}}>⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
                     </div>
                   )) : <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>}
                 </div>
@@ -632,7 +632,7 @@
                   <div key={entry.id} className="leaderboard-entry">
                     <span className="leaderboard-rank">#{i + 1}</span>
                     <span className="leaderboard-name">{entry.player_name}</span>
-                    <span className="leaderboard-score">⭐ {entry.score} (🔥 {entry.streak || Math.ceil(entry.score / (entry.level || 1))}) ({LEVEL_NAMES[entry.level]})</span>
+                    <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
                   </div>
                 ))
               ) : (
@@ -696,7 +696,7 @@
                 <div className="feedback-icon">❌</div>
                 <div className="feedback-title wrong">Sorry, that's not correct!</div>
                 <div style={{marginBottom: '15px', color: 'var(--text-secondary)'}}>{currentChord?.name} = {currentChord?.notes.join(' - ')}</div>
-                <div style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '20px'}}>⭐ Score: {score} (🔥 Streak: {streak})</div>
+                <div style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '20px'}}>⭐ Score: {score}</div>
                 <div style={{marginBottom: '15px'}}>
                   <input
                     type="text"
@@ -735,7 +735,7 @@
                     <div key={entry.id} className="leaderboard-entry">
                       <span className="leaderboard-rank">#{i + 1}</span>
                       <span className="leaderboard-name">{entry.player_name}</span>
-                      <span className="leaderboard-score">⭐ {entry.score} (🔥 {entry.streak || Math.ceil(entry.score / (entry.level || 1))}) ({LEVEL_NAMES[entry.level]})</span>
+                      <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
                     </div>
                   ))
                 ) : (
