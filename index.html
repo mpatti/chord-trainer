@@ -137,47 +137,63 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
     
-    // Chord definitions by level
+    // Chord definitions by level - expanded with all root notes
     const CHORDS = {
-      1: [  // Level 1: Triads (Major + Minor)
-        { name: 'C', notes: ['C', 'E', 'G'] },
-        { name: 'Am', notes: ['A', 'C', 'E'] },
-        { name: 'F', notes: ['F', 'A', 'C'] },
-        { name: 'G', notes: ['G', 'B', 'D'] },
-        { name: 'Dm', notes: ['D', 'F', 'A'] },
-        { name: 'Em', notes: ['E', 'G', 'B'] },
-        { name: 'Cm', notes: ['C', 'Eb', 'G'] },
-        { name: 'Fm', notes: ['F', 'Ab', 'C'] },
+      1: [  // Level 1: Triads - all 12 roots
+        { name: 'C', notes: ['C', 'E', 'G'] }, { name: 'Cm', notes: ['C', 'Eb', 'G'] },
+        { name: 'D', notes: ['D', 'F#', 'A'] }, { name: 'Dm', notes: ['D', 'F', 'A'] },
+        { name: 'E', notes: ['E', 'G#', 'B'] }, { name: 'Em', notes: ['E', 'G', 'B'] },
+        { name: 'F', notes: ['F', 'A', 'C'] }, { name: 'Fm', notes: ['F', 'Ab', 'C'] },
+        { name: 'G', notes: ['G', 'B', 'D'] }, { name: 'Gm', notes: ['G', 'Bb', 'D'] },
+        { name: 'A', notes: ['A', 'C#', 'E'] }, { name: 'Am', notes: ['A', 'C', 'E'] },
+        { name: 'Bb', notes: ['Bb', 'D', 'F'] }, { name: 'Bbm', notes: ['Bb', 'Db', 'F'] },
+        { name: 'Eb', notes: ['Eb', 'G', 'Bb'] }, { name: 'Ebm', notes: ['Eb', 'Gb', 'Bb'] },
+        { name: 'Ab', notes: ['Ab', 'C', 'Eb'] }, { name: 'Abm', notes: ['Ab', 'Cb', 'Eb'] },
+        { name: 'Db', notes: ['Db', 'F', 'Ab'] }, { name: 'Dbm', notes: ['Db', 'Fb', 'Ab'] },
+        { name: 'Gb', notes: ['Gb', 'Bb', 'Db'] }, { name: 'Gbm', notes: ['Gb', 'Bbb', 'Db'] },
+        { name: 'B', notes: ['B', 'D#', 'F#'] }, { name: 'Bm', notes: ['B', 'D', 'F#'] },
       ],
-      2: [  // Level 2: 7th chords
-        { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
-        { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] },
-        { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
-        { name: 'Fm7', notes: ['F', 'Ab', 'C', 'Eb'] },
-        { name: 'C7', notes: ['C', 'E', 'G', 'Bb'] },
-        { name: 'F7', notes: ['F', 'A', 'C', 'Eb'] },
-        { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
-        { name: 'A7', notes: ['A', 'C#', 'E', 'G'] },
+      2: [  // Level 2: 7th chords - all 12 roots
+        { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] }, { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] }, { name: 'C7', notes: ['C', 'E', 'G', 'Bb'] },
+        { name: 'Dmaj7', notes: ['D', 'F#', 'A', 'C#'] }, { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] }, { name: 'D7', notes: ['D', 'F#', 'A', 'C'] },
+        { name: 'Emaj7', notes: ['E', 'G#', 'B', 'D#'] }, { name: 'Em7', notes: ['E', 'G', 'B', 'D'] }, { name: 'E7', notes: ['E', 'G#', 'B', 'D'] },
+        { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] }, { name: 'Fm7', notes: ['F', 'Ab', 'C', 'Eb'] }, { name: 'F7', notes: ['F', 'A', 'C', 'Eb'] },
+        { name: 'Gmaj7', notes: ['G', 'B', 'D', 'F#'] }, { name: 'Gm7', notes: ['G', 'Bb', 'D', 'F'] }, { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
+        { name: 'Amaj7', notes: ['A', 'C#', 'E', 'G#'] }, { name: 'Am7', notes: ['A', 'C', 'E', 'G'] }, { name: 'A7', notes: ['A', 'C#', 'E', 'G'] },
+        { name: 'Bbmaj7', notes: ['Bb', 'D', 'F', 'A'] }, { name: 'Bbm7', notes: ['Bb', 'Db', 'F', 'Ab'] }, { name: 'Bb7', notes: ['Bb', 'D', 'F', 'Ab'] },
+        { name: 'Ebmaj7', notes: ['Eb', 'G', 'Bb', 'D'] }, { name: 'Ebm7', notes: ['Eb', 'Gb', 'Bb', 'Db'] }, { name: 'Eb7', notes: ['Eb', 'G', 'Bb', 'Db'] },
+        { name: 'Abmaj7', notes: ['Ab', 'C', 'Eb', 'G'] }, { name: 'Abm7', notes: ['Ab', 'Cb', 'Eb', 'Gb'] }, { name: 'Ab7', notes: ['Ab', 'C', 'Eb', 'Gb'] },
+        { name: 'Dbmaj7', notes: ['Db', 'F', 'Ab', 'C'] }, { name: 'Dbm7', notes: ['Db', 'Fb', 'Ab', 'Cb'] }, { name: 'Db7', notes: ['Db', 'F', 'Ab', 'Cb'] },
+        { name: 'Gbmaj7', notes: ['Gb', 'Bb', 'Db', 'F'] }, { name: 'Gbm7', notes: ['Gb', 'Bbb', 'Db', 'Fb'] }, { name: 'Gb7', notes: ['Gb', 'Bb', 'Db', 'Fb'] },
+        { name: 'Bmaj7', notes: ['B', 'D#', 'F#', 'A#'] }, { name: 'Bm7', notes: ['B', 'D', 'F#', 'A'] }, { name: 'B7', notes: ['B', 'D#', 'F#', 'A'] },
       ],
-      3: [  // Level 3: Altered + half diminished
-        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
-        { name: 'C7b9', notes: ['C', 'E', 'G', 'Bb', 'Db'] },
-        { name: 'C7#9', notes: ['C', 'E', 'G', 'Bb', 'D#'] },
-        { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] },
-        { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
-        { name: 'Cm7b5', notes: ['C', 'Eb', 'Gb', 'Bb'] },
-        { name: 'Dm7b5', notes: ['D', 'F', 'Ab', 'C'] },
-        { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] },
+      3: [  // Level 3: Altered + half dim - expanded
+        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] }, { name: 'Cm9', notes: ['C', 'Eb', 'G', 'Bb', 'D'] },
+        { name: 'C7b9', notes: ['C', 'E', 'G', 'Bb', 'Db'] }, { name: 'C7#9', notes: ['C', 'E', 'G', 'Bb', 'D#'] },
+        { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] }, { name: 'B7#11', notes: ['B', 'D#', 'F#', 'A', 'C#', 'E#'] },
+        { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] }, { name: 'Cm7b5', notes: ['C', 'Eb', 'Gb', 'Bb'] },
+        { name: 'Dm7b5', notes: ['D', 'F', 'Ab', 'C'] }, { name: 'Em7b5', notes: ['E', 'G', 'Bb', 'D'] },
+        { name: 'Fm7b5', notes: ['F', 'Ab', 'Cb', 'Eb'] }, { name: 'Gm7b5', notes: ['G', 'Bb', 'Db', 'F'] },
+        { name: 'Am7b5', notes: ['A', 'C', 'Eb', 'G'] }, { name: 'Bbm7b5', notes: ['Bb', 'Db', 'Fb', 'Ab'] },
+        { name: 'Ebm7b5', notes: ['Eb', 'Gb', 'Bbb', 'Db'] }, { name: 'Abm7b5', notes: ['Ab', 'Cb', 'E', 'Gb'] },
+        { name: 'Dbm7b5', notes: ['Db', 'Fb', 'A', 'Cb'] }, { name: 'Gbm7b5', notes: ['Gb', 'Bb', 'D', 'Fb'] },
+        { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] }, { name: 'D7b13', notes: ['D', 'F#', 'A', 'C', 'Gb', 'Bb'] },
       ],
-      4: [  // Level 4: All chords mixed
-        { name: 'C', notes: ['C', 'E', 'G'] },
-        { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
-        { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
-        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
-        { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'A'] },
-        { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
-        { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
-        { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] },
+      4: [  // Level 4: Extended (9th, 11th, 13th)
+        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] }, { name: 'Cm9', notes: ['C', 'Eb', 'G', 'Bb', 'D'] },
+        { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'A'] }, { name: 'Cm13', notes: ['C', 'Eb', 'G', 'Bb', 'D', 'A'] },
+        { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] }, { name: 'Cm11', notes: ['C', 'Eb', 'G', 'Bb', 'D', 'F'] },
+        { name: 'D9', notes: ['D', 'F#', 'A', 'C', 'E'] }, { name: 'Dm9', notes: ['D', 'F', 'A', 'C', 'E'] },
+        { name: 'D13', notes: ['D', 'F#', 'A', 'C', 'E', 'B'] }, { name: 'Dm13', notes: ['D', 'F', 'A', 'C', 'E', 'B'] },
+        { name: 'E9', notes: ['E', 'G#', 'B', 'D', 'F#'] }, { name: 'Em9', notes: ['E', 'G', 'B', 'D', 'F#'] },
+        { name: 'F9', notes: ['F', 'A', 'C', 'Eb', 'G'] }, { name: 'Fm9', notes: ['F', 'Ab', 'C', 'Eb', 'G'] },
+        { name: 'F13', notes: ['F', 'A', 'C', 'Eb', 'G', 'D'] }, { name: 'Fm13', notes: ['F', 'Ab', 'C', 'Eb', 'G', 'D'] },
+        { name: 'G9', notes: ['G', 'B', 'D', 'F', 'A'] }, { name: 'Gm9', notes: ['G', 'Bb', 'D', 'F', 'A'] },
+        { name: 'G13', notes: ['G', 'B', 'D', 'F', 'A', 'E'] }, { name: 'Gm13', notes: ['G', 'Bb', 'D', 'F', 'A', 'E'] },
+        { name: 'A9', notes: ['A', 'C#', 'E', 'G', 'B'] }, { name: 'Am9', notes: ['A', 'C', 'E', 'G', 'B'] },
+        { name: 'Bb9', notes: ['Bb', 'D', 'F', 'Ab', 'C'] }, { name: 'Bbm9', notes: ['Bb', 'Db', 'F', 'Ab', 'C'] },
+        { name: 'Eb9', notes: ['Eb', 'G', 'Bb', 'Db', 'F'] }, { name: 'Ebm9', notes: ['Eb', 'Gb', 'Bb', 'Db', 'F'] },
+        { name: 'Ab9', notes: ['Ab', 'C', 'Eb', 'Gb', 'Bb'] }, { name: 'Abm9', notes: ['Ab', 'Cb', 'Eb', 'Gb', 'Bb'] },
       ],
       5: [  // Level 5: Scale degree chords (roman numeral context)
         // ii chord in C major = Dm7
@@ -243,10 +259,12 @@
     
     const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert', 'Scale Degrees'];
     
-    function getChord(level) {
+    function getChord(level, lastChordName = '') {
       const chordLevel = Math.min(Math.ceil(level / 8), 5);
       const chords = CHORDS[chordLevel];
-      return chords[Math.floor(Math.random() * chords.length)];
+      // Don't repeat the same chord
+      const available = chords.filter(c => c.name !== lastChordName);
+      return available[Math.floor(Math.random() * available.length)];
     }
     
     const LEVEL_DESCRIPTIONS = {
@@ -261,6 +279,7 @@
       const [level, setLevel] = useState(1);
       const [streak, setStreak] = useState(0);
       const [currentChord, setCurrentChord] = useState(() => getChord(1));
+      const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
       const [showCorrectFlash, setShowCorrectFlash] = useState(false);
@@ -341,7 +360,8 @@
           // Auto-advance after 0.8 seconds
           setTimeout(() => {
             setSelectedNotes([]);
-            setCurrentChord(getChord(level + 1));
+            setLastChordName(currentChord.name);
+            setCurrentChord(getChord(level + 1, currentChord.name));
           }, 800);
         } else {
           setShowFeedback(true);
@@ -354,7 +374,8 @@
       const handleNext = () => {
         setShowFeedback(false);
         setSelectedNotes([]);
-        setCurrentChord(getChord(level + 1));
+        setLastChordName(currentChord.name);
+        setCurrentChord(getChord(level + 1, currentChord.name));
       };
       
       const startGame = () => {
@@ -487,6 +508,13 @@
               <button className="btn-secondary" onClick={() => setSelectedNotes([])}>Clear</button>
               <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>Submit</button>
             </div>
+            
+            <div className="progress-section">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: ((streak % 8) / 8 * 100) + '%' }}></div>
+              </div>
+              <div className="progress-text">{streak % 8}/8 to next level</div>
+            </div>
           </main>
           
           {showFeedback && (
@@ -564,7 +592,7 @@
               <div className="celebration-card">
                 <div className="celebration-emojis">🎉🎊🎉</div>
                 <div className="celebration-title">LEVEL UP!</div>
-                <div className="celebration-level">{LEVEL_NAMES[Math.min(Math.ceil((level)/8), 4)]}</div>
+                <div className="celebration-level">You completed {LEVEL_NAMES[currentLevel]} - Now onto {LEVEL_NAMES[currentLevel + 1]}!</div>
                 <button className="btn-primary" onClick={closeLevelUp}>Awesome! 🚀</button>
               </div>
             </div>
