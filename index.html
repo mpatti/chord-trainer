@@ -134,58 +134,47 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
     
-    // Chord definitions by level - simplified
+    // Chord definitions by level
     const CHORDS = {
-      1: [  // All triads (major + minor)
+      1: [  // Level 1: Triads (Major + Minor)
         { name: 'C', notes: ['C', 'E', 'G'] },
         { name: 'Am', notes: ['A', 'C', 'E'] },
         { name: 'F', notes: ['F', 'A', 'C'] },
         { name: 'G', notes: ['G', 'B', 'D'] },
         { name: 'Dm', notes: ['D', 'F', 'A'] },
         { name: 'Em', notes: ['E', 'G', 'B'] },
-        { name: 'D', notes: ['D', 'F#', 'A'] },
-        { name: 'E', notes: ['E', 'G#', 'B'] },
         { name: 'Cm', notes: ['C', 'Eb', 'G'] },
         { name: 'Fm', notes: ['F', 'Ab', 'C'] },
-        { name: 'Gm', notes: ['G', 'Bb', 'D'] },
-        { name: 'Bm', notes: ['B', 'D', 'F#'] },
       ],
-      2: [  // 7th chords (Maj7, Min7, Dom7)
+      2: [  // Level 2: 7th chords
         { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
         { name: 'Fmaj7', notes: ['F', 'A', 'C', 'E'] },
-        { name: 'Gmaj7', notes: ['G', 'B', 'D', 'F#'] },
         { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
         { name: 'Fm7', notes: ['F', 'Ab', 'C', 'Eb'] },
-        { name: 'Gm7', notes: ['G', 'Bb', 'D', 'F'] },
-        { name: 'Bm7', notes: ['B', 'D', 'F#', 'A'] },
-        { name: 'Dm7', notes: ['D', 'F', 'A', 'C'] },
         { name: 'C7', notes: ['C', 'E', 'G', 'Bb'] },
         { name: 'F7', notes: ['F', 'A', 'C', 'Eb'] },
         { name: 'G7', notes: ['G', 'B', 'D', 'F'] },
         { name: 'A7', notes: ['A', 'C#', 'E', 'G'] },
       ],
-      3: [  // 9th chords + Altered dominants
+      3: [  // Level 3: Altered + half diminished
         { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
-        { name: 'Dm9', notes: ['D', 'F', 'A', 'C', 'E'] },
-        { name: 'Em9', notes: ['E', 'G', 'B', 'D', 'F#'] },
-        { name: 'Fm9', notes: ['F', 'Ab', 'C', 'Eb', 'G'] },
-        { name: 'Gm9', notes: ['G', 'Bb', 'D', 'F', 'A'] },
         { name: 'C7b9', notes: ['C', 'E', 'G', 'Bb', 'Db'] },
         { name: 'C7#9', notes: ['C', 'E', 'G', 'Bb', 'D#'] },
         { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] },
-        { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] },
-      ],
-      4: [  // Extended + Half diminished
-        { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'A'] },
-        { name: 'Dm13', notes: ['D', 'F', 'A', 'C', 'E', 'B'] },
-        { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
-        { name: 'Dm11', notes: ['D', 'F', 'A', 'C', 'E', 'G'] },
         { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
         { name: 'Cm7b5', notes: ['C', 'Eb', 'Gb', 'Bb'] },
         { name: 'Dm7b5', notes: ['D', 'F', 'Ab', 'C'] },
-        { name: 'F13', notes: ['F', 'A', 'C', 'Eb', 'G', 'D'] },
-        { name: 'G13', notes: ['G', 'B', 'D', 'F', 'A', 'E'] },
-        { name: 'Bb13', notes: ['Bb', 'D', 'F', 'Ab', 'C', 'G'] },
+        { name: 'G7b13', notes: ['G', 'B', 'D', 'F', 'Bb', 'Db'] },
+      ],
+      4: [  // Level 4: All chords mixed
+        { name: 'C', notes: ['C', 'E', 'G'] },
+        { name: 'Cm7', notes: ['C', 'Eb', 'G', 'Bb'] },
+        { name: 'Cmaj7', notes: ['C', 'E', 'G', 'B'] },
+        { name: 'C9', notes: ['C', 'E', 'G', 'Bb', 'D'] },
+        { name: 'C13', notes: ['C', 'E', 'G', 'Bb', 'D', 'A'] },
+        { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
+        { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
+        { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] },
       ]
     };
     
@@ -227,23 +216,21 @@
     
     const ALL_KEYS = [...WHITE_KEYS, ...BLACK_KEYS];
     
-    function getChord(level, lastChord = null) {
-      const chords = CHORDS[Math.min(Math.ceil(level / 5), 4)] || CHORDS[1];
-      // Don't repeat the same chord
-      let available = chords.filter(c => c.name !== lastChord);
-      if (available.length === 0) available = chords;
-      return available[Math.floor(Math.random() * available.length)];
+    const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
+    
+    function getChord(level) {
+      const chordLevel = Math.min(Math.ceil(level / 8), 4);
+      const chords = CHORDS[chordLevel];
+      return chords[Math.floor(Math.random() * chords.length)];
     }
     
     function App() {
       const [level, setLevel] = useState(1);
-      const [xp, setXp] = useState(0);
       const [streak, setStreak] = useState(0);
       const [currentChord, setCurrentChord] = useState(() => getChord(1));
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
       const [isCorrect, setIsCorrect] = useState(false);
-      const [questionsAnswered, setQuestionsAnswered] = useState(0);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(false);
       const [leaderboardData, setLeaderboardData] = useState([]);
@@ -307,15 +294,21 @@
         setShowFeedback(true);
         
         if (isCorrectNow) {
-          setStreak(s => s + 1);
-          setXp(xp + 10 + streak * 2);
-          setLevel(l => l + 1);
+          const newStreak = streak + 1;
+          setStreak(newStreak);
+          
+          // Level up every 8 correct answers
+          if ((newStreak) % 8 === 0) {
+            setLevel(l => l + 1);
+            setShowLevelUp(true);
+          }
+          
           playChord(currentChord.notes);
           // Auto-advance after 1.5 seconds
           setTimeout(() => {
             setShowFeedback(false);
             setSelectedNotes([]);
-            setCurrentChord(getChord(level + 1, currentChord.name));
+            setCurrentChord(getChord(level + 1));
           }, 1500);
         } else {
           setStreak(0);
@@ -358,7 +351,7 @@
         if (!playerName.trim()) return;
         const { error } = await supabase
           .from('leaderboard')
-          .insert([{ player_name: playerName, score: xp, level: level }]);
+          .insert([{ player_name: playerName, score: streak, level: level }]);
         if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
@@ -431,15 +424,14 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
-              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">Level</div></div>
-              <div className="stat"><div className="stat-value">{xp}</div><div className="stat-label">Score</div></div>
+              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">{LEVEL_NAMES[Math.min(Math.ceil(level/8), 4)]}</div></div>
               <div className="stat"><div className="stat-value streak">🔥 {streak}</div><div className="stat-label">Streak</div></div>
             </div>
           </header>
           
           <main>
             <div className="challenge-card">
-              <div className="level-badge">Level {level}</div>
+              <div className="level-badge">{LEVEL_NAMES[Math.min(Math.ceil(level/8), 4)]}</div>
               <div className="chord-name">{currentChord?.name}</div>
               <div className="chord-hint">Select all the notes in this chord</div>
             </div>
@@ -496,7 +488,7 @@
                     <div key={entry.id} className="leaderboard-entry">
                       <span className="leaderboard-rank">#{i + 1}</span>
                       <span className="leaderboard-name">{entry.player_name}</span>
-                      <span className="leaderboard-score">{entry.score} XP</span>
+                      <span className="leaderboard-score">{entry.score} 🔥</span>
                     </div>
                   ))
                 ) : (
@@ -506,7 +498,7 @@
                 {gameEnded && !scoreSaved && (
                   <div className="save-score-section">
                     <div style={{textAlign: 'center', marginBottom: '15px', fontSize: '1.2rem', fontWeight: '600'}}>
-                      Final Score: {xp} XP
+                      Streak: {streak} 🔥 (Level {level})
                     </div>
                     <input
                       type="text"
@@ -542,7 +534,7 @@
               <div className="celebration-card">
                 <div className="celebration-emojis">🎉🎊🎉</div>
                 <div className="celebration-title">LEVEL UP!</div>
-                <div className="celebration-level">You reached Level {level + 1}!</div>
+                <div className="celebration-level">{LEVEL_NAMES[Math.min(Math.ceil((level)/8), 4)]}</div>
                 <button className="btn-primary" onClick={closeLevelUp}>Awesome! 🚀</button>
               </div>
             </div>
