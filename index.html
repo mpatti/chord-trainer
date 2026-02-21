@@ -513,7 +513,7 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
-              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">{LEVEL_NAMES[Math.min(Math.ceil(level/8), 4)]}</div></div>
+              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">{LEVEL_NAMES[currentLevel]}</div></div>
               <div className="stat"><div className="stat-value streak">🔥 {streak}</div><div className="stat-label">Streak</div></div>
             </div>
           </header>
