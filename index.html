@@ -468,7 +468,18 @@
               <div className="start-screen">
                 <div className="start-title">🎹 Chord Theory Trainer</div>
                 <div className="start-subtitle">Choose your difficulty and get the highest streak!</div>
-                <button className="leaderboard-btn" style={{marginBottom: '20px'}} onClick={() => setShowLeaderboard(true)}>🏆 View Leaderboard</button>
+                
+                <div className="leaderboard-section" style={{marginBottom: '20px', maxHeight: '200px', overflowY: 'auto', textAlign: 'left'}}>
+                  <div style={{fontWeight: '600', marginBottom: '10px', textAlign: 'center'}}>🏆 Top Scores</div>
+                  {leaderboardData.length > 0 ? leaderboardData.slice(0,5).map((entry, i) => (
+                    <div key={entry.id} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
+                      <span style={{color: 'var(--accent)'}}>#{i+1}</span>
+                      <span style={{flex: 1, paddingLeft: '10px'}}>{entry.player_name}</span>
+                      <span style={{fontWeight: '600'}}>{entry.score} 🔥</span>
+                    </div>
+                  )) : <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>}
+                </div>
+                
                 <input
                   type="text"
                   className="start-input"
