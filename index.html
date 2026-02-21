@@ -288,8 +288,8 @@
     const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert', 'Scale Degrees'];
     
     function getChord(level, lastChordName = '') {
-      // Level 1-8 = Beginner (index 0), Level 9-16 = Intermediate (index 1), etc.
-      const chordIndex = Math.floor((level - 1) / 8);
+      // Level 1 = Beginner (index 0), Level 2 = Intermediate (index 1), etc.
+      const chordIndex = Math.min(level - 1, 4);
       const chords = CHORDS[chordIndex + 1];
       // Don't repeat the same chord
       const available = chords.filter(c => c.name !== lastChordName);
@@ -423,7 +423,7 @@
         setShowLevelUp(false);
       };
       
-      const currentLevel = Math.min(Math.floor((level - 1) / 8) + 1, 5);
+      const currentLevel = Math.min(level, 5);
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
       
