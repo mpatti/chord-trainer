@@ -425,16 +425,13 @@
       
       const saveScore = async () => {
         if (!playerName.trim()) return;
-        console.log('Saving:', playerName, streak, selectedDifficulty);
         const { error } = await supabase
           .from('leaderboard')
           .insert([{ player_name: playerName, score: streak, level: selectedDifficulty }]);
-        if (error) {
-          console.error('Save error:', error);
-          alert('Error saving score: ' + error.message);
-        } else {
+        if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
+          setShowFeedback(false); // Close the modal
         }
       };
       
@@ -591,8 +588,8 @@
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
                   />
-                  <button className="btn-primary" style={{width: '100%'}} onClick={saveScore} disabled={!playerName.trim()}>
-                    Save Score
+                  <button className="btn-primary" style={{width: '100%'}} onClick={saveScore} disabled={!playerName.trim() || scoreSaved}>
+                    {scoreSaved ? 'Saved!' : 'Save Score'}
                   </button>
                 </div>
                 <button className="btn-secondary" onClick={() => { setShowFeedback(false); setGameStarted(false); }}>
