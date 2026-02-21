@@ -387,10 +387,10 @@
             setCurrentChord(getChord(selectedDifficulty, currentChord.name));
           }, 800);
         } else {
-          // Save score before ending game
+          // Wrong answer - game over!
           setShowFeedback(true);
           setGameEnded(true);
-          setShowLeaderboard(true);
+          return; // Stop here - don't advance
         }
       };
       
