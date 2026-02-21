@@ -393,19 +393,33 @@
       
       useEffect(() => {
         if (window.THEME === 'arcade') document.body.classList.add('arcade');
-        Tone.start().then(() => {
-          const piano = new Tone.Sampler({
-            urls: {
-              C4: "C4.mp3",
-              "D#4": "Ds4.mp3", 
-              "F#4": "Fs4.mp3",
-              A4: "A4.mp3",
-            },
-            release: 1,
-            baseUrl: "https://tonejs.github.io/audio/salamander/",
-          }).toDestination();
-          setSynth(piano);
-        });
+        
+        const initAudio = async () => {
+          try {
+            await Tone.start();
+            const piano = new Tone.Sampler({
+              urls: {
+                C4: "C4.mp3",
+                "D#4": "Ds4.mp3", 
+                "F#4": "Fs4.mp3",
+                A4: "A4.mp3",
+              },
+              release: 1,
+              baseUrl: "https://tonejs.github.io/audio/salamander/",
+            }).toDestination();
+            setSynth(piano);
+          } catch (e) {
+            console.log('Audio init failed:', e);
+          }
+        };
+        
+        // Try to init on first user interaction
+        const handleInteraction = () => {
+          if (!synth) initAudio();
+        };
+        document.addEventListener('click', handleInteraction, { once: true });
+        
+        initAudio();
       }, []);
       
       const playNote = (note) => {
