@@ -425,7 +425,7 @@
         if (!playerName.trim()) return;
         const { error } = await supabase
           .from('leaderboard')
-          .insert([{ player_name: playerName, score: streak, level: level }]);
+          .insert([{ player_name: playerName, score: streak, level: selectedDifficulty }]);
         if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
@@ -571,7 +571,7 @@
                 {gameEnded && !scoreSaved && (
                   <div className="save-score-section">
                     <div style={{textAlign: 'center', marginBottom: '15px', fontSize: '1.2rem', fontWeight: '600'}}>
-                      Streak: {streak} 🔥 (Level {level})
+                      Streak: {streak} 🔥 ({LEVEL_NAMES[selectedDifficulty]})
                     </div>
                     <input
                       type="text"
