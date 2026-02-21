@@ -376,6 +376,7 @@
     function App() {
       const [selectedDifficulty, setSelectedDifficulty] = useState(1);
       const [streak, setStreak] = useState(0);
+      const [score, setScore] = useState(0);
       const [currentChord, setCurrentChord] = useState(null);
       const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
@@ -459,7 +460,9 @@
         
         if (isCorrectNow) {
           const newStreak = streak + 1;
+          const newScore = newStreak * selectedDifficulty;
           setStreak(newStreak);
+          setScore(newScore);
           
           // Show correct flash
           setShowCorrectFlash(true);
@@ -532,7 +535,7 @@
         if (!playerName.trim()) return;
         const { error } = await supabase
           .from('leaderboard')
-          .insert([{ player_name: playerName, score: streak, level: selectedDifficulty }]);
+          .insert([{ player_name: playerName, score: score, streak: streak, level: selectedDifficulty }]);
         if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
@@ -553,6 +556,7 @@
       
       const restartGame = () => {
         setStreak(0);
+        setScore(0);
         setSelectedNotes([]);
         setShowFeedback(false);
         setGameEnded(false);
@@ -582,7 +586,7 @@
                     <div key={entry.id} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
                       <span style={{color: 'var(--accent)'}}>#{i+1}</span>
                       <span style={{flex: 1, paddingLeft: '10px'}}>{entry.player_name}</span>
-                      <span style={{fontWeight: '600'}}>{entry.score} 🔥</span>
+                      <span style={{fontWeight: '600'}}>⭐ {entry.score} (🔥 {entry.streak || entry.score})</span>
                     </div>
                   )) : <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>}
                 </div>
@@ -628,7 +632,7 @@
                   <div key={entry.id} className="leaderboard-entry">
                     <span className="leaderboard-rank">#{i + 1}</span>
                     <span className="leaderboard-name">{entry.player_name}</span>
-                    <span className="leaderboard-score">{entry.score} 🔥 ({LEVEL_NAMES[entry.level]})</span>
+                    <span className="leaderboard-score">⭐ {entry.score} (🔥 {entry.streak || Math.ceil(entry.score / (entry.level || 1))}) ({LEVEL_NAMES[entry.level]})</span>
                   </div>
                 ))
               ) : (
@@ -649,7 +653,14 @@
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
               <button className="leaderboard-btn" onClick={() => setGameStarted(false)}>❌ Quit</button>
-              <div className="stat"><div className="stat-value streak" style={celebrate ? {animation: 'streakBounce 0.5s ease-out'} : {}}>{streak}</div><div className="stat-label">🔥 Streak</div></div>
+              <div className="stat">
+                <div className="stat-value" style={celebrate ? {animation: 'streakBounce 0.5s ease-out'} : {}}>{score}</div>
+                <div className="stat-label">⭐ Score ({selectedDifficulty}x)</div>
+              </div>
+              <div className="stat">
+                <div className="stat-value streak" style={celebrate ? {animation: 'streakBounce 0.5s ease-out'} : {}}>{streak}</div>
+                <div className="stat-label">🔥 Streak</div>
+              </div>
             </div>
           </header>
           
@@ -685,7 +696,7 @@
                 <div className="feedback-icon">❌</div>
                 <div className="feedback-title wrong">Sorry, that's not correct!</div>
                 <div style={{marginBottom: '15px', color: 'var(--text-secondary)'}}>{currentChord?.name} = {currentChord?.notes.join(' - ')}</div>
-                <div style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '20px'}}>🔥 Streak: {streak}</div>
+                <div style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '20px'}}>⭐ Score: {score} (🔥 Streak: {streak})</div>
                 <div style={{marginBottom: '15px'}}>
                   <input
                     type="text"
@@ -724,7 +735,7 @@
                     <div key={entry.id} className="leaderboard-entry">
                       <span className="leaderboard-rank">#{i + 1}</span>
                       <span className="leaderboard-name">{entry.player_name}</span>
-                      <span className="leaderboard-score">{entry.score} 🔥 ({LEVEL_NAMES[entry.level]})</span>
+                      <span className="leaderboard-score">⭐ {entry.score} (🔥 {entry.streak || Math.ceil(entry.score / (entry.level || 1))}) ({LEVEL_NAMES[entry.level]})</span>
                     </div>
                   ))
                 ) : (
