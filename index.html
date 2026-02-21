@@ -9,6 +9,14 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+  <script>
+    // Configure Supabase - set these before loading the app
+    window.ENV = {
+      NEXT_PUBLIC_SUPABASE_URL: 'https://skprrfogphnsrtsrgrjo.supabase.co',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: 'sb_publishable_Qb7immayhksG6trimQUg2g_ang9eKfT'
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -78,6 +86,22 @@
     .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a855f7); transition: width 0.5s; }
     .progress-text { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 10px; }
+    
+    .leaderboard-btn { background: rgba(255,255,255,0.1); border: none; color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+    .leaderboard-btn:hover { background: rgba(255,255,255,0.2); }
+    
+    .leaderboard-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 200; }
+    .leaderboard-card { background: var(--card); padding: 30px; border-radius: 20px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .leaderboard-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; text-align: center; }
+    .leaderboard-entry { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .leaderboard-entry:last-child { border-bottom: none; }
+    .leaderboard-rank { font-weight: 600; color: var(--accent); width: 40px; }
+    .leaderboard-name { flex: 1; }
+    .leaderboard-score { font-weight: 600; }
+    .leaderboard-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: var(--text); font-size: 1rem; margin-bottom: 15px; }
+    .leaderboard-input:focus { outline: none; border-color: var(--accent); }
+    .save-score-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -153,6 +177,11 @@
     // Convert note to piano key format (flats to sharps)
     const normalizeNote = (note) => flatToSharp[note] || note;
     
+    // Supabase client - configure via window.env or update these values
+    const supabaseUrl = window.ENV?.NEXT_PUBLIC_SUPABASE_URL || 'https://skprrfogphnsrtsrgrjo.supabase.co';
+    const supabaseKey = window.ENV?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_Qb7immayhksG6trimQUg2g_ang9eKfT';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
     // Piano keys: white keys are at fixed positions, black keys between them
     // C3 starts at left:0, each white key is 48px wide
     const WHITE_KEYS = [
@@ -187,6 +216,11 @@
       const [questionsAnswered, setQuestionsAnswered] = useState(0);
       const [questionsCorrect, setQuestionsCorrect] = useState(0);
       const [synth, setSynth] = useState(null);
+      const [showLeaderboard, setShowLeaderboard] = useState(false);
+      const [leaderboardData, setLeaderboardData] = useState([]);
+      const [playerName, setPlayerName] = useState('');
+      const [scoreSaved, setScoreSaved] = useState(false);
+      const [gameEnded, setGameEnded] = useState(false);
       
       useEffect(() => {
         Tone.start().then(() => {
@@ -245,11 +279,57 @@
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
       
+      const fetchLeaderboard = async () => {
+        const { data, error } = await supabase
+          .from('leaderboard')
+          .select('*')
+          .order('score', { ascending: false })
+          .limit(10);
+        if (!error && data) setLeaderboardData(data);
+      };
+      
+      const saveScore = async () => {
+        if (!playerName.trim()) return;
+        const { error } = await supabase
+          .from('leaderboard')
+          .insert([{ player_name: playerName, score: xp, level: level }]);
+        if (!error) {
+          setScoreSaved(true);
+          fetchLeaderboard();
+        }
+      };
+      
+      const openLeaderboard = () => {
+        fetchLeaderboard();
+        setShowLeaderboard(true);
+      };
+      
+      const endGame = () => {
+        setGameEnded(true);
+        setShowLeaderboard(true);
+      };
+      
+      const restartGame = () => {
+        setLevel(1);
+        setXp(0);
+        setStreak(0);
+        setQuestionsAnswered(0);
+        setQuestionsCorrect(0);
+        setCurrentChord(getChord(1));
+        setSelectedNotes([]);
+        setShowFeedback(false);
+        setGameEnded(false);
+        setScoreSaved(false);
+        setPlayerName('');
+        setShowLeaderboard(false);
+      };
+      
       return (
         <div className="container">
           <header>
             <h1>🎹 Chord Theory Trainer</h1>
             <div className="stats">
+              <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
               <div className="stat"><div className="stat-value">{xp}</div><div className="stat-label">XP</div></div>
               <div className="stat"><div className="stat-value streak">🔥 {streak}</div><div className="stat-label">Streak</div></div>
             </div>
@@ -278,6 +358,7 @@
             <div className="controls">
               <button className="btn-secondary" onClick={() => setSelectedNotes([])}>Clear</button>
               <button className="btn-secondary" onClick={handlePreview}>🔊 Preview</button>
+              <button className="btn-secondary" onClick={endGame}>🏁 End Game</button>
               <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>Submit</button>
             </div>
             
@@ -307,6 +388,58 @@
                   </>
                 )}
                 <button className="btn-primary" onClick={handleNext}>Next</button>
+              </div>
+            </div>
+          )}
+          
+          {showLeaderboard && (
+            <div className="leaderboard-modal">
+              <div className="leaderboard-card">
+                <button className="close-btn" onClick={() => setShowLeaderboard(false)}>×</button>
+                <div className="leaderboard-title">🏆 Leaderboard</div>
+                
+                {leaderboardData.length > 0 ? (
+                  leaderboardData.map((entry, i) => (
+                    <div key={entry.id} className="leaderboard-entry">
+                      <span className="leaderboard-rank">#{i + 1}</span>
+                      <span className="leaderboard-name">{entry.player_name}</span>
+                      <span className="leaderboard-score">{entry.score} XP</span>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>
+                )}
+                
+                {gameEnded && !scoreSaved && (
+                  <div className="save-score-section">
+                    <div style={{textAlign: 'center', marginBottom: '15px', fontSize: '1.2rem', fontWeight: '600'}}>
+                      Final Score: {xp} XP
+                    </div>
+                    <input
+                      type="text"
+                      className="leaderboard-input"
+                      placeholder="Enter your name"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      maxLength={20}
+                    />
+                    <button className="btn-primary" style={{width: '100%'}} onClick={saveScore}>
+                      Save Score
+                    </button>
+                  </div>
+                )}
+                
+                {scoreSaved && (
+                  <div style={{textAlign: 'center', marginTop: '20px', color: 'var(--success)'}}>
+                    ✓ Score saved!
+                  </div>
+                )}
+                
+                {gameEnded && (
+                  <button className="btn-secondary" style={{width: '100%', marginTop: '15px'}} onClick={restartGame}>
+                    Play Again
+                  </button>
+                )}
               </div>
             </div>
           )}
