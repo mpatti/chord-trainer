@@ -313,7 +313,7 @@
       const [showFeedback, setShowFeedback] = useState(false);
       const [showCorrectFlash, setShowCorrectFlash] = useState(false);
       const [synth, setSynth] = useState(null);
-      const [showLeaderboard, setShowLeaderboard] = useState(false);
+      const [showLeaderboard, setShowLeaderboard] = useState(true);
       const [leaderboardData, setLeaderboardData] = useState([]);
       const [playerName, setPlayerName] = useState('');
       const [scoreSaved, setScoreSaved] = useState(false);
@@ -406,6 +406,7 @@
           localStorage.setItem('chordTrainerName', playerName);
           setCurrentChord(getChord(selectedDifficulty));
           setGameStarted(true);
+          setShowLeaderboard(false);
         }
       };
       
@@ -457,6 +458,7 @@
       useEffect(() => {
         const saved = localStorage.getItem('chordTrainerName');
         if (saved) setPlayerName(saved);
+        fetchLeaderboard();
       }, []);
       
       if (!gameStarted) {
