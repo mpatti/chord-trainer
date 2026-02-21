@@ -103,6 +103,29 @@
     .leaderboard-input:focus { outline: none; border-color: var(--accent); }
     .save-score-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
     .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
+    
+    /* Start screen */
+    .start-screen { text-align: center; padding: 40px 20px; }
+    .start-title { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; background: linear-gradient(135deg, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .start-subtitle { color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1rem; }
+    .start-input { width: 100%; max-width: 300px; padding: 15px 20px; border-radius: 12px; border: 2px solid rgba(99, 102, 241, 0.3); background: rgba(255,255,255,0.1); color: var(--text); font-size: 1.2rem; margin-bottom: 20px; transition: border-color 0.3s; }
+    .start-input:focus { outline: none; border-color: var(--accent); }
+    .start-btn { font-size: 1.2rem; padding: 15px 40px; }
+    
+    /* Level up celebration */
+    .celebration-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200; }
+    .celebration-card { background: var(--card); padding: 50px; border-radius: 24px; text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid var(--accent); box-shadow: 0 0 40px var(--accent-glow); }
+    .celebration-title { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; background: linear-gradient(135deg, #f59e0b, #ef4444, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s infinite; }
+    .celebration-level { font-size: 1.5rem; color: var(--text-secondary); margin-bottom: 20px; }
+    .celebration-emojis { font-size: 3rem; margin-bottom: 20px; animation: bounce 0.6s infinite; }
+    
+    @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes shimmer { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    
+    /* Confetti */
+    .confetti { position: fixed; width: 10px; height: 10px; top: -10px; animation: fall linear forwards; z-index: 201; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
   </style>
 </head>
 <body>
@@ -222,6 +245,8 @@
       const [playerName, setPlayerName] = useState('');
       const [scoreSaved, setScoreSaved] = useState(false);
       const [gameEnded, setGameEnded] = useState(false);
+      const [gameStarted, setGameStarted] = useState(false);
+      const [showLevelUp, setShowLevelUp] = useState(false);
       
       useEffect(() => {
         Tone.start().then(() => {
@@ -267,15 +292,38 @@
       };
       
       const handleNext = () => {
+        const wasLevelUp = questionsAnswered > 0 && questionsAnswered % 5 === 4 && questionsCorrect >= 3;
+        const newLevel = wasLevelUp ? level + 1 : level;
+        
         setShowFeedback(false);
         setSelectedNotes([]);
         
-        if (questionsAnswered > 0 && questionsAnswered % 5 === 4) {
-          if (questionsCorrect >= 3) setLevel(l => l + 1);
+        if (wasLevelUp) {
+          setLevel(newLevel);
+          setShowLevelUp(true);
           setQuestionsCorrect(0);
         }
         
-        setCurrentChord(getChord(level));
+        if (questionsAnswered > 0 && questionsAnswered % 5 === 4) {
+          if (questionsCorrect >= 3) {
+            // Level up handled above
+          } else {
+            setQuestionsCorrect(0);
+          }
+        }
+        
+        setCurrentChord(getChord(newLevel));
+      };
+      
+      const startGame = () => {
+        if (playerName.trim()) {
+          localStorage.setItem('chordTrainerName', playerName);
+          setGameStarted(true);
+        }
+      };
+      
+      const closeLevelUp = () => {
+        setShowLevelUp(false);
       };
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
@@ -325,10 +373,45 @@
         setShowLeaderboard(false);
       };
       
+      // Load saved name on mount
+      useEffect(() => {
+        const saved = localStorage.getItem('chordTrainerName');
+        if (saved) setPlayerName(saved);
+      }, []);
+      
+      if (!gameStarted) {
+        return (
+          <div className="container">
+            <main>
+              <div className="start-screen">
+                <div className="start-title">🎹 Chord Theory Trainer</div>
+                <div className="start-subtitle">Learn music theory by building chords!</div>
+                <input
+                  type="text"
+                  className="start-input"
+                  placeholder="Enter your name"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && startGame()}
+                  maxLength={20}
+                />
+                <br />
+                <button className="btn-primary start-btn" onClick={startGame}>
+                  Start Game 🚀
+                </button>
+              </div>
+            </main>
+          </div>
+        );
+      }
+      
       return (
         <div className="container">
           <header>
-            <h1>🎹 Chord Theory Trainer</h1>
+            <div>
+              <h1>🎹 Chord Theory Trainer</h1>
+              <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>Playing as: {playerName}</div>
+            </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
               <div className="stat"><div className="stat-value">{xp}</div><div className="stat-label">XP</div></div>
@@ -441,6 +524,17 @@
                     Play Again
                   </button>
                 )}
+              </div>
+            </div>
+          )}
+          
+          {showLevelUp && (
+            <div className="celebration-overlay" onClick={closeLevelUp}>
+              <div className="celebration-card">
+                <div className="celebration-emojis">🎉🎊🎉</div>
+                <div className="celebration-title">LEVEL UP!</div>
+                <div className="celebration-level">You reached Level {level + 1}!</div>
+                <button className="btn-primary" onClick={closeLevelUp}>Awesome! 🚀</button>
               </div>
             </div>
           )}
