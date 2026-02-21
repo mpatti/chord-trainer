@@ -634,6 +634,7 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
+              <button className="leaderboard-btn" onClick={() => setGameStarted(false)}>❌ Quit</button>
               <div className="stat"><div className="stat-value streak" style={celebrate ? {animation: 'streakBounce 0.5s ease-out'} : {}}>{streak}</div><div className="stat-label">🔥 Streak</div></div>
             </div>
           </header>
