@@ -323,8 +323,6 @@
         const correctCount = correctNormalized.filter(n => selectedNormalized.includes(n)).length;
         const isCorrectNow = correctCount === correctNormalized.length && selectedNormalized.length === correctNormalized.length;
         
-        setShowFeedback(true);
-        
         if (isCorrectNow) {
           const newStreak = streak + 1;
           setStreak(newStreak);
@@ -340,7 +338,7 @@
           }
           
           playChord(currentChord.notes);
-          // Auto-advance after 0.8 seconds (faster!)
+          // Auto-advance after 0.8 seconds
           setTimeout(() => {
             setSelectedNotes([]);
             setCurrentChord(getChord(level + 1));
