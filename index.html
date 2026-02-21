@@ -225,14 +225,42 @@
       'C4': 60, 'C#4': 61, 'D4': 62, 'D#4': 63, 'E4': 64, 'F4': 65, 'F#4': 66, 'G4': 67, 'G#4': 68, 'A4': 69, 'A#4': 70, 'B4': 71, 'C5': 72
     };
     
-    // Map flat notes to sharp equivalents for MIDI lookup
+    // Map flat notes to sharp equivalents for MIDI lookup (including double flats/sharps)
     const flatToSharp = {
+      // Single flats
       'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#',
-      'Cb': 'B', 'Fb': 'E', 'E#': 'F', 'B#': 'C'
+      'Cb': 'B', 'Fb': 'E', 'E#': 'F', 'B#': 'C',
+      // Double flats
+      'Dbb': 'C', 'Ebb': 'D', 'Gbb': 'F', 'Abb': 'G', 'Bbb': 'A',
+      'Cbb': 'Bb', 'Fbb': 'Eb',
+      // Double sharps
+      'Cx': 'D', 'Dx': 'E', 'Fx': 'G', 'Gx': 'A', 'Ax': 'B',
+      'Bx': 'C#', 'Ex': 'F#',
     };
     
-    // Convert note to piano key format (flats to sharps)
-    const normalizeNote = (note) => flatToSharp[note] || note;
+    // Alternative note names (for display)
+    const noteAlternates = {
+      'C': ['C'], 'Db': ['C#', 'Bx'], 'D': ['D'], 'Eb': ['D#', 'Cx'], 'E': ['E', 'Fb'], 'F': ['F', 'E#'],
+      'Gb': ['F#', 'Ex'], 'G': ['G'], 'Ab': ['G#'], 'A': ['A'], 'Bb': ['A#', 'Cbb'], 'B': ['B', 'Cb'],
+      'Cb': ['B'], 'C#': ['Db'], 'D#': ['Eb'], 'F#': ['Gb'], 'G#': ['Ab'], 'A#': ['Bb'],
+    };
+    
+    // Convert note to piano key format (handles single and double flats/sharps)
+    const normalizeNote = (note) => {
+      if (flatToSharp[note]) return flatToSharp[note];
+      return note;
+    };
+    
+    // Check if a note matches any of its alternatives
+    const noteMatches = (userNote, chordNote) => {
+      const normalizedUser = normalizeNote(userNote);
+      const normalizedChord = normalizeNote(chordNote);
+      if (normalizedUser === normalizedChord) return true;
+      // Check alternatives
+      const userAlternates = noteAlternates[normalizedUser] || [normalizedUser];
+      const chordAlternates = noteAlternates[normalizedChord] || [normalizedChord];
+      return userAlternates.some(a => chordAlternates.includes(a));
+    };
     
     // Supabase client - configure via window.env or update these values
     const supabaseUrl = window.ENV?.NEXT_PUBLIC_SUPABASE_URL || 'https://skprrfogphnsrtsrgrjo.supabase.co';
@@ -337,10 +365,11 @@
       
       const handleSubmit = () => {
         const correct = currentChord.notes;
-        const correctNormalized = correct.map(normalizeNote);
-        const selectedNormalized = selectedNotes.map(n => normalizeNote(n.replace(/\d/g, '')));
-        const correctCount = correctNormalized.filter(n => selectedNormalized.includes(n)).length;
-        const isCorrectNow = correctCount === correctNormalized.length && selectedNormalized.length === correctNormalized.length;
+        // Check each selected note against chord notes (handles enharmonics)
+        const allCorrect = selectedNotes.every(sel => 
+          correct.some(crd => noteMatches(sel.replace(/\d/g, ''), crd))
+        );
+        const isCorrectNow = allCorrect && selectedNotes.length === correct.length;
         
         if (isCorrectNow) {
           const newStreak = streak + 1;
