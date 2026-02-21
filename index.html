@@ -572,17 +572,28 @@
           </main>
           
           {showFeedback && (
-            <div className="feedback-overlay" onClick={handleNext}>
+            <div className="feedback-overlay">
               <div className="feedback-card">
                 <div className="feedback-icon">❌</div>
-                <div className="feedback-title wrong">Wrong!</div>
-                <div className="correct-notes">
-                  {currentChord?.notes.map(n => <span key={n} className="note-tag">{n}</span>)}
+                <div className="feedback-title wrong">Sorry, that's not correct!</div>
+                <div style={{marginBottom: '15px', color: 'var(--text-secondary)'}}>{currentChord?.name} = {currentChord?.notes.join(' - ')}</div>
+                <div style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '20px'}}>🔥 Streak: {streak}</div>
+                <div style={{marginBottom: '15px'}}>
+                  <input
+                    type="text"
+                    className="leaderboard-input"
+                    placeholder="Enter your name to save score"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    maxLength={20}
+                  />
+                  <button className="btn-primary" style={{width: '100%'}} onClick={saveScore} disabled={!playerName.trim()}>
+                    Save Score
+                  </button>
                 </div>
-                <div className="feedback-explanation">
-                  {currentChord?.name} = {currentChord?.notes.join(' - ')}
-                </div>
-                <button className="btn-primary" onClick={handleNext}>Next</button>
+                <button className="btn-secondary" onClick={() => { setShowFeedback(false); setGameStarted(false); }}>
+                  Back to Menu
+                </button>
               </div>
             </div>
           )}
