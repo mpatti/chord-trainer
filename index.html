@@ -240,7 +240,6 @@
       const [xp, setXp] = useState(0);
       const [streak, setStreak] = useState(0);
       const [currentChord, setCurrentChord] = useState(() => getChord(1));
-      const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
       const [isCorrect, setIsCorrect] = useState(false);
@@ -253,7 +252,6 @@
       const [gameEnded, setGameEnded] = useState(false);
       const [gameStarted, setGameStarted] = useState(false);
       const [showLevelUp, setShowLevelUp] = useState(false);
-      const [lastChordName, setLastChordName] = useState('');
       
       useEffect(() => {
         Tone.start().then(() => {
