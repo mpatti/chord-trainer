@@ -183,6 +183,9 @@
         { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
         { name: 'Cm7b5', notes: ['C', 'Eb', 'Gb', 'Bb'] },
         { name: 'Dm7b5', notes: ['D', 'F', 'Ab', 'C'] },
+        { name: 'F13', notes: ['F', 'A', 'C', 'Eb', 'G', 'D'] },
+        { name: 'G13', notes: ['G', 'B', 'D', 'F', 'A', 'E'] },
+        { name: 'Bb13', notes: ['Bb', 'D', 'F', 'Ab', 'C', 'G'] },
       ]
     };
     
@@ -286,7 +289,10 @@
           setQuestionsCorrect(c => c + 1);
           playChord(currentChord.notes);
         } else {
+          // Wrong answer = game over!
           setStreak(0);
+          setGameEnded(true);
+          setShowLeaderboard(true);
         }
         setQuestionsAnswered(q => q + 1);
       };
@@ -411,7 +417,8 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
-              <div className="stat"><div className="stat-value">{xp}</div><div className="stat-label">XP</div></div>
+              <div className="stat"><div className="stat-value">{level}</div><div className="stat-label">Level</div></div>
+              <div className="stat"><div className="stat-value">{xp}</div><div className="stat-label">Score</div></div>
               <div className="stat"><div className="stat-value streak">🔥 {streak}</div><div className="stat-label">Streak</div></div>
             </div>
           </header>
@@ -439,24 +446,16 @@
             <div className="controls">
               <button className="btn-secondary" onClick={() => setSelectedNotes([])}>Clear</button>
               <button className="btn-secondary" onClick={handlePreview}>🔊 Preview</button>
-              <button className="btn-secondary" onClick={endGame}>🏁 End Game</button>
               <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>Submit</button>
-            </div>
-            
-            <div className="progress-section">
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: ((questionsAnswered % 5) / 5 * 100) + '%' }}></div>
-              </div>
-              <div className="progress-text">{questionsAnswered % 5}/5 to level up</div>
             </div>
           </main>
           
-          {showFeedback && (
+          {showFeedback && !gameEnded && (
             <div className="feedback-overlay" onClick={handleNext}>
               <div className="feedback-card">
                 <div className="feedback-icon">{isCorrect ? '✅' : '❌'}</div>
                 <div className={`feedback-title ${isCorrect ? 'correct' : 'wrong'}`}>
-                  {isCorrect ? 'Correct!' : 'Not quite!'}
+                  {isCorrect ? 'Correct!' : 'Wrong!'}
                 </div>
                 {!isCorrect && (
                   <>
@@ -468,7 +467,7 @@
                     </div>
                   </>
                 )}
-                <button className="btn-primary" onClick={handleNext}>Next</button>
+                {isCorrect && <button className="btn-primary" onClick={handleNext}>Next</button>}
               </div>
             </div>
           )}
