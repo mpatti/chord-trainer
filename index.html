@@ -120,9 +120,12 @@
     @keyframes streakBounce { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.4); } 50% { transform: scale(1.1); } 75% { transform: scale(1.2); } }
     
     /* Confetti */
-    .confetti { position: fixed; pointer-events: none; z-index: 100; top: 0; left: 0; right: 0; height: 100vh; overflow: hidden; }
-    .confetti-piece { position: absolute; width: 12px; height: 12px; top: 30%; animation: confettiFall 1s ease-out forwards; }
-    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(400px) rotate(720deg); opacity: 0; } }
+    .confetti { position: fixed; pointer-events: none; z-index: 100; top: 50%; left: 50%; width: 0; height: 0; }
+    .confetti-piece { position: absolute; width: 12px; height: 12px; animation: confettiExplode 0.8s ease-out forwards; }
+    @keyframes confettiExplode { 
+      0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; } 
+      100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.5); opacity: 0; } 
+    }
     
     @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; transform: translate(-50%, -50%); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%); } }
     
@@ -449,12 +452,19 @@
           setCelebrate(true);
           // Spawn confetti
           const colors = ['#ff00ff', '#00ffff', '#ffff00', '#00ff00', '#ff0000'];
-          const pieces = Array.from({length: 20}, (_, i) => ({
-            id: Date.now() + i,
-            left: 40 + Math.random() * 20,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            delay: Math.random() * 0.3
-          }));
+          const pieces = Array.from({length: 30}, (_, i) => {
+            const angle = (Math.random() * 360) * (Math.PI / 180);
+            const distance = 150 + Math.random() * 200;
+            const tx = Math.cos(angle) * distance + 'px';
+            const ty = Math.sin(angle) * distance + 'px';
+            const rot = (Math.random() * 720 - 360) + 'deg';
+            return {
+              id: Date.now() + i,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              tx, ty, rot,
+              delay: Math.random() * 0.1
+            };
+          });
           setConfetti(pieces);
           setTimeout(() => setConfetti([]), 1000);
           setTimeout(() => setCelebrate(false), 500);
@@ -682,8 +692,8 @@
           
           {showCorrectFlash && <div className="correct-flash">✓</div>}
           {confetti.map(p => (
-            <div key={p.id} className="confetti" style={{left: p.left + '%', top: '30%'}}>
-              <div className="confetti-piece" style={{background: p.color, animationDelay: p.delay + 's'}} />
+            <div key={p.id} className="confetti">
+              <div className="confetti-piece" style={{background: p.color, animationDelay: p.delay + 's', '--tx': p.tx, '--ty': p.ty, '--rot': p.rot}} />
             </div>
           ))}
           
