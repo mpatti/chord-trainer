@@ -119,6 +119,11 @@
     
     @keyframes streakBounce { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.4); } 50% { transform: scale(1.1); } 75% { transform: scale(1.2); } }
     
+    /* Confetti */
+    .confetti { position: fixed; pointer-events: none; z-index: 100; }
+    .confetti-piece { position: absolute; width: 10px; height: 10px; animation: confettiFall 1s ease-out forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(400px) rotate(720deg); opacity: 0; } }
+    
     @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; transform: translate(-50%, -50%); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%); } }
     
     .piano-wrapper { display: flex; justify-content: center; margin: 30px 0; overflow-x: auto; }
@@ -378,6 +383,7 @@
       const [showFeedback, setShowFeedback] = useState(false);
       const [showCorrectFlash, setShowCorrectFlash] = useState(false);
       const [celebrate, setCelebrate] = useState(false);
+      const [confetti, setConfetti] = useState([]);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(true);
       const [leaderboardData, setLeaderboardData] = useState([]);
@@ -445,6 +451,16 @@
           // Show correct flash
           setShowCorrectFlash(true);
           setCelebrate(true);
+          // Spawn confetti
+          const colors = ['#ff00ff', '#00ffff', '#ffff00', '#00ff00', '#ff0000'];
+          const pieces = Array.from({length: 20}, (_, i) => ({
+            id: Date.now() + i,
+            left: 40 + Math.random() * 20,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            delay: Math.random() * 0.3
+          }));
+          setConfetti(pieces);
+          setTimeout(() => setConfetti([]), 1000);
           setTimeout(() => setCelebrate(false), 500);
           setTimeout(() => setShowCorrectFlash(false), 800);
           
@@ -669,6 +685,11 @@
           )}
           
           {showCorrectFlash && <div className="correct-flash">✓</div>}
+          {confetti.map(p => (
+            <div key={p.id} className="confetti" style={{left: p.left + '%', top: '30%'}}>
+              <div className="confetti-piece" style={{background: p.color, animationDelay: p.delay + 's'}} />
+            </div>
+          ))}
           
           {showLeaderboard && (
             <div className="leaderboard-modal">
