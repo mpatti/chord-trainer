@@ -311,6 +311,12 @@
           setXp(xp + 10 + streak * 2);
           setLevel(l => l + 1);
           playChord(currentChord.notes);
+          // Auto-advance after 1.5 seconds
+          setTimeout(() => {
+            setShowFeedback(false);
+            setSelectedNotes([]);
+            setCurrentChord(getChord(level + 1, currentChord.name));
+          }, 1500);
         } else {
           setStreak(0);
           setGameEnded(true);
@@ -457,8 +463,8 @@
             </div>
           </main>
           
-          {showFeedback && !gameEnded && (
-            <div className="feedback-overlay" onClick={handleNext}>
+          {showFeedback && (
+            <div className="feedback-overlay" onClick={!isCorrect ? handleNext : undefined}>
               <div className="feedback-card">
                 <div className="feedback-icon">{isCorrect ? '✅' : '❌'}</div>
                 <div className={`feedback-title ${isCorrect ? 'correct' : 'wrong'}`}>
@@ -472,9 +478,9 @@
                     <div className="feedback-explanation">
                       {currentChord?.name} = {currentChord?.notes.join(' - ')}
                     </div>
+                    <button className="btn-primary" onClick={handleNext}>Next</button>
                   </>
                 )}
-                {isCorrect && <button className="btn-primary" onClick={handleNext}>Next</button>}
               </div>
             </div>
           )}
