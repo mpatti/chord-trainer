@@ -150,6 +150,9 @@
       'Cb': 'B', 'Fb': 'E', 'E#': 'F', 'B#': 'C'
     };
     
+    // Convert note to piano key format (flats to sharps)
+    const normalizeNote = (note) => flatToSharp[note] || note;
+    
     // Piano keys: white keys are at fixed positions, black keys between them
     // C3 starts at left:0, each white key is 48px wide
     const WHITE_KEYS = [
@@ -208,10 +211,11 @@
       
       const handleSubmit = () => {
         const correct = currentChord.notes;
-        // Strip octave from selected notes for comparison (C3 -> C, Eb4 -> Eb)
-        const selectedNoOctave = selectedNotes.map(n => n.replace(/\d/g, ''));
-        const correctCount = correct.filter(n => selectedNoOctave.includes(n)).length;
-        const isCorrectNow = correctCount === correct.length && selectedNoOctave.length === correct.length;
+        // Normalize all notes (flats to sharps) for comparison
+        const correctNormalized = correct.map(normalizeNote);
+        const selectedNormalized = selectedNotes.map(n => normalizeNote(n.replace(/\d/g, '')));
+        const correctCount = correctNormalized.filter(n => selectedNormalized.includes(n)).length;
+        const isCorrectNow = correctCount === correctNormalized.length && selectedNormalized.length === correctNormalized.length;
         
         setIsCorrect(isCorrectNow);
         setShowFeedback(true);
