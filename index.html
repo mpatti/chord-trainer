@@ -160,7 +160,39 @@
     .feedback-icon { font-size: 4rem; margin-bottom: 15px; }
     .feedback-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
     .feedback-title.correct { color: var(--success); }
-    .feedback-title.wrong { color: var(--error); }
+    .feedback-title.wrong { color: var(--error); animation: shake 0.5s ease-out; }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+      20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+    
+    .wrong-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 5rem;
+      font-weight: bold;
+      color: red;
+      text-shadow: 0 0 30px red, 0 0 60px red;
+      animation: wrongFlash 0.5s ease-out forwards;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    @keyframes wrongFlash {
+      0% { opacity: 0; transform: scale(2); }
+      20% { opacity: 1; transform: scale(1); }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: scale(0.8); }
+    }
     .feedback-explanation { color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
     .correct-notes { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
     .note-tag { background: rgba(99, 102, 241, 0.2); color: var(--accent); padding: 5px 12px; border-radius: 15px; font-weight: 600; }
@@ -758,6 +790,7 @@
           )}
           
           {showCorrectFlash && <div className="correct-flash">✓</div>}
+          {lostLife && <div className="wrong-overlay">💔 -1 LIFE!</div>}
           {confetti.map(p => (
             <div key={p.id} className="confetti">
               <div className="confetti-piece" style={{background: p.color, animationDelay: p.delay + 's', '--tx': p.tx, '--ty': p.ty, '--rot': p.rot}} />
