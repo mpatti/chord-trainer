@@ -386,6 +386,7 @@
       const [confetti, setConfetti] = useState([]);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(true);
+      const [showAllScores, setShowAllScores] = useState(false);
       const [leaderboardData, setLeaderboardData] = useState([]);
       const [playerName, setPlayerName] = useState('');
       const [scoreSaved, setScoreSaved] = useState(false);
@@ -624,17 +625,24 @@
         return (
           <div className="leaderboard-modal">
             <div className="leaderboard-card">
-              <button className="close-btn" onClick={() => setShowLeaderboard(false)}>×</button>
+              <button className="close-btn" onClick={() => { setShowLeaderboard(false); setShowAllScores(false); }}>×</button>
               <div className="leaderboard-title">🏆 Leaderboard</div>
               
               {leaderboardData.length > 0 ? (
-                leaderboardData.map((entry, i) => (
-                  <div key={entry.id} className="leaderboard-entry">
-                    <span className="leaderboard-rank">#{i + 1}</span>
-                    <span className="leaderboard-name">{entry.player_name}</span>
-                    <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
-                  </div>
-                ))
+                <>
+                  {(showAllScores ? leaderboardData : leaderboardData.slice(0, 5)).map((entry, i) => (
+                    <div key={entry.id} className="leaderboard-entry">
+                      <span className="leaderboard-rank">#{i + 1}</span>
+                      <span className="leaderboard-name">{entry.player_name}</span>
+                      <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
+                    </div>
+                  ))}
+                  {leaderboardData.length > 5 && !showAllScores && (
+                    <button onClick={() => setShowAllScores(true)} style={{display: 'block', width: '100%', marginTop: '15px', padding: '10px', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: '8px', cursor: 'pointer'}}>
+                      View All {leaderboardData.length} Scores →
+                    </button>
+                  )}
+                </>
               ) : (
                 <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>
               )}
@@ -731,13 +739,20 @@
                 <div className="leaderboard-title">🏆 Leaderboard</div>
                 
                 {leaderboardData.length > 0 ? (
-                  leaderboardData.map((entry, i) => (
-                    <div key={entry.id} className="leaderboard-entry">
-                      <span className="leaderboard-rank">#{i + 1}</span>
-                      <span className="leaderboard-name">{entry.player_name}</span>
-                      <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
-                    </div>
-                  ))
+                  <>
+                    {(showAllScores ? leaderboardData : leaderboardData.slice(0, 5)).map((entry, i) => (
+                      <div key={entry.id} className="leaderboard-entry">
+                        <span className="leaderboard-rank">#{i + 1}</span>
+                        <span className="leaderboard-name">{entry.player_name}</span>
+                        <span className="leaderboard-score">⭐ {entry.score} ({LEVEL_NAMES[entry.level]})</span>
+                      </div>
+                    ))}
+                    {leaderboardData.length > 5 && !showAllScores && (
+                      <button onClick={() => setShowAllScores(true)} style={{display: 'block', width: '100%', marginTop: '15px', padding: '10px', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: '8px', cursor: 'pointer'}}>
+                        View All {leaderboardData.length} Scores →
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <p style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No scores yet!</p>
                 )}
