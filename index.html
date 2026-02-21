@@ -522,7 +522,8 @@
         if (!error) {
           setScoreSaved(true);
           fetchLeaderboard();
-          setShowFeedback(false); // Close the modal
+          setShowFeedback(false);
+          setGameStarted(false); // Return to menu (game over)
         }
       };
       
