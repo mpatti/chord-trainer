@@ -110,6 +110,15 @@
     .chord-hint { color: var(--text-secondary); font-size: 0.9rem; }
     .correct-flash { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit', sans-serif; font-size: 5rem; font-weight: 700; color: var(--success); text-shadow: 0 0 30px var(--success); animation: fadeUp 1s forwards; pointer-events: none; z-index: 50; }
     
+    /* Celebration effects */
+    .celebrate-border { animation: borderFlash 0.5s ease-out; }
+    @keyframes borderFlash { 0% { box-shadow: 0 0 0 0 var(--success); } 50% { box-shadow: 0 0 40px 10px var(--success); } 100% { box-shadow: 0 0 0 0 var(--success); } }
+    
+    .chord-name.celebrate { animation: chordPop 0.5s ease-out; }
+    @keyframes chordPop { 0% { transform: scale(1); } 30% { transform: scale(1.3); filter: brightness(1.5); } 100% { transform: scale(1); } }
+    
+    @keyframes streakBounce { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.4); } 50% { transform: scale(1.1); } 75% { transform: scale(1.2); } }
+    
     @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; transform: translate(-50%, -50%); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%); } }
     
     .piano-wrapper { display: flex; justify-content: center; margin: 30px 0; overflow-x: auto; }
@@ -368,6 +377,7 @@
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
       const [showCorrectFlash, setShowCorrectFlash] = useState(false);
+      const [celebrate, setCelebrate] = useState(false);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(true);
       const [leaderboardData, setLeaderboardData] = useState([]);
@@ -434,6 +444,8 @@
           
           // Show correct flash
           setShowCorrectFlash(true);
+          setCelebrate(true);
+          setTimeout(() => setCelebrate(false), 500);
           setTimeout(() => setShowCorrectFlash(false), 800);
           
           playChord(currentChord.notes);
@@ -522,7 +534,7 @@
       if (!gameStarted) {
         return (
           <div className="container">
-            <main>
+            <main className={celebrate ? 'celebrate' : ''}>
               <div className="start-screen">
                 <div className="start-title">🎹 Chord Theory Trainer</div>
                 <div className="start-subtitle">Choose your difficulty and get the highest streak!</div>
@@ -599,14 +611,14 @@
             </div>
             <div className="stats">
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
-              <div className="stat"><div className="stat-value">{streak}</div><div className="stat-label">🔥 Streak</div></div>
+              <div className="stat"><div className="stat-value streak" style={celebrate ? {animation: 'streakBounce 0.5s ease-out'} : {}}>{streak}</div><div className="stat-label">🔥 Streak</div></div>
             </div>
           </header>
           
           <main>
-            <div className="challenge-card">
+            <div className="challenge-card" style={celebrate ? {animation: 'borderFlash 0.5s ease-out', borderColor: 'var(--success)'} : {}}>
               <div className="level-badge" style={window.THEME === 'arcade' ? {background: LEVEL_COLORS[selectedDifficulty], color: '#000', border: '3px solid ' + LEVEL_COLORS[selectedDifficulty]} : {}}>{LEVEL_NAMES[selectedDifficulty]} - {LEVEL_DESCRIPTIONS[selectedDifficulty]}</div>
-              <div className="chord-name" style={window.THEME === 'arcade' ? {color: LEVEL_COLORS[selectedDifficulty]} : {}}>{currentChord?.name}</div>
+              <div className="chord-name" style={{...window.THEME === 'arcade' ? {color: LEVEL_COLORS[selectedDifficulty]} : {}, ...(celebrate ? {animation: 'chordPop 0.5s ease-out'} : {})}}>{currentChord?.name}</div>
               <div className="chord-hint">Select all the notes in this chord</div>
             </div>
             
