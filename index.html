@@ -562,7 +562,7 @@
                     <div key={entry.id} className="leaderboard-entry">
                       <span className="leaderboard-rank">#{i + 1}</span>
                       <span className="leaderboard-name">{entry.player_name}</span>
-                      <span className="leaderboard-score">{entry.score} 🔥</span>
+                      <span className="leaderboard-score">{entry.score} 🔥 ({LEVEL_NAMES[entry.level]})</span>
                     </div>
                   ))
                 ) : (
