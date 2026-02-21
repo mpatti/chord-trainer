@@ -227,21 +227,24 @@
     
     const ALL_KEYS = [...WHITE_KEYS, ...BLACK_KEYS];
     
-    function getChord(level) {
-      const chords = CHORDS[Math.min(level, 4)] || CHORDS[1];
-      return chords[Math.floor(Math.random() * chords.length)];
+    function getChord(level, lastChord = null) {
+      const chords = CHORDS[Math.min(Math.ceil(level / 5), 4)] || CHORDS[1];
+      // Don't repeat the same chord
+      let available = chords.filter(c => c.name !== lastChord);
+      if (available.length === 0) available = chords;
+      return available[Math.floor(Math.random() * available.length)];
     }
     
     function App() {
       const [level, setLevel] = useState(1);
       const [xp, setXp] = useState(0);
       const [streak, setStreak] = useState(0);
-      const [currentChord, setCurrentChord] = useState(getChord(1));
+      const [currentChord, setCurrentChord] = useState(() => getChord(1));
+      const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
       const [isCorrect, setIsCorrect] = useState(false);
       const [questionsAnswered, setQuestionsAnswered] = useState(0);
-      const [questionsCorrect, setQuestionsCorrect] = useState(0);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(false);
       const [leaderboardData, setLeaderboardData] = useState([]);
@@ -250,22 +253,45 @@
       const [gameEnded, setGameEnded] = useState(false);
       const [gameStarted, setGameStarted] = useState(false);
       const [showLevelUp, setShowLevelUp] = useState(false);
+      const [lastChordName, setLastChordName] = useState('');
       
       useEffect(() => {
         Tone.start().then(() => {
-          setSynth(new Tone.PolySynth(Tone.Synth).toDestination());
+          const piano = new Tone.Sampler({
+            urls: {
+              C4: "C4.mp3",
+              "D#4": "Ds4.mp3", 
+              "F#4": "Fs4.mp3",
+              A4: "A4.mp3",
+            },
+            release: 1,
+            baseUrl: "https://tonejs.github.io/audio/salamander/",
+          }).toDestination();
+          setSynth(piano);
         });
       }, []);
       
+      const playNote = (note) => {
+        if (!synth) return;
+        const noteName = note.replace(/\d/g, '');
+        const octave = note.match(/\d/)?.[0] || '4';
+        try {
+          synth.triggerAttackRelease(noteName + octave, '8n');
+        } catch (e) {
+          // Fallback if sample not loaded
+        }
+      };
+      
       const playChord = (notes) => {
         if (!synth) return;
-        const midi = notes.map(n => {
-          // Handle flats: Ab -> G#, then look up with octave
-          let noteName = n;
-          if (flatToSharp[n]) noteName = flatToSharp[n];
-          return noteToMidi[noteName + '4'] || 60;
+        notes.forEach((n, i) => {
+          const noteName = normalizeNote(n);
+          try {
+            synth.triggerAttackRelease(noteName + '4', '1n');
+          } catch (e) {
+            // Fallback
+          }
         });
-        synth.triggerAttackRelease(midi, '1n');
       };
       
       const toggleNote = (note) => {
@@ -274,7 +300,6 @@
       
       const handleSubmit = () => {
         const correct = currentChord.notes;
-        // Normalize all notes (flats to sharps) for comparison
         const correctNormalized = correct.map(normalizeNote);
         const selectedNormalized = selectedNotes.map(n => normalizeNote(n.replace(/\d/g, '')));
         const correctCount = correctNormalized.filter(n => selectedNormalized.includes(n)).length;
@@ -286,10 +311,9 @@
         if (isCorrectNow) {
           setStreak(s => s + 1);
           setXp(xp + 10 + streak * 2);
-          setQuestionsCorrect(c => c + 1);
+          setLevel(l => l + 1);
           playChord(currentChord.notes);
         } else {
-          // Wrong answer = game over!
           setStreak(0);
           setGameEnded(true);
           setShowLeaderboard(true);
@@ -298,24 +322,10 @@
       };
       
       const handleNext = () => {
-        const nextQuestionCount = questionsAnswered + 1;
-        const wasLevelUp = nextQuestionCount % 5 === 0 && questionsCorrect >= 3;
-        const newLevel = wasLevelUp ? level + 1 : level;
-        
         setShowFeedback(false);
         setSelectedNotes([]);
-        
-        if (wasLevelUp) {
-          setLevel(newLevel);
-          setShowLevelUp(true);
-          setQuestionsCorrect(0);
-        } else if (nextQuestionCount % 5 === 0) {
-          // Didn't pass, just reset
-          setQuestionsCorrect(0);
-        }
-        
-        setQuestionsAnswered(nextQuestionCount);
-        setCurrentChord(getChord(newLevel));
+        const newChord = getChord(level + 1, currentChord.name);
+        setCurrentChord(newChord);
       };
       
       const startGame = () => {
@@ -330,8 +340,6 @@
       };
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
-      
-      const fetchLeaderboard = async () => {
         const { data, error } = await supabase
           .from('leaderboard')
           .select('*')
@@ -434,18 +442,17 @@
               <div className="piano">
                 {WHITE_KEYS.map(k => (
                   <div key={k.note} className={`key white-key ${selectedNotes.includes(k.note) ? 'active' : ''}`}
-                    style={{ left: k.left + 'px' }} onClick={() => toggleNote(k.note)} />
+                    style={{ left: k.left + 'px' }} onClick={() => toggleNote(k.note)} onMouseDown={() => playNote(k.note)} />
                 ))}
                 {BLACK_KEYS.map(k => (
                   <div key={k.note} className={`key black-key ${selectedNotes.includes(k.note) ? 'active' : ''}`}
-                    style={{ left: k.left + 'px' }} onClick={() => toggleNote(k.note)} />
+                    style={{ left: k.left + 'px' }} onClick={() => toggleNote(k.note)} onMouseDown={() => playNote(k.note)} />
                 ))}
               </div>
             </div>
             
             <div className="controls">
               <button className="btn-secondary" onClick={() => setSelectedNotes([])}>Clear</button>
-              <button className="btn-secondary" onClick={handlePreview}>🔊 Preview</button>
               <button className="btn-primary" onClick={handleSubmit} disabled={selectedNotes.length === 0}>Submit</button>
             </div>
           </main>
