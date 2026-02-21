@@ -53,6 +53,9 @@
     .level-badge { display: inline-block; background: var(--accent); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 15px; }
     .chord-name { font-family: 'Outfit', sans-serif; font-size: 4rem; font-weight: 700; margin-bottom: 10px; text-shadow: 0 0 30px var(--accent-glow); }
     .chord-hint { color: var(--text-secondary); font-size: 0.9rem; }
+    .correct-flash { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit', sans-serif; font-size: 5rem; font-weight: 700; color: var(--success); text-shadow: 0 0 30px var(--success); animation: fadeUp 1s forwards; pointer-events: none; z-index: 50; }
+    
+    @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; transform: translate(-50%, -50%); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%); } }
     
     .piano-wrapper { display: flex; justify-content: center; margin: 30px 0; overflow-x: auto; }
     .piano { position: relative; width: 714px; height: 180px; }
@@ -246,13 +249,21 @@
       return chords[Math.floor(Math.random() * chords.length)];
     }
     
+    const LEVEL_DESCRIPTIONS = {
+      1: 'Triads - Major & Minor',
+      2: '7th Chords',
+      3: 'Altered & Half-Dim',
+      4: 'All Chord Types',
+      5: 'Scale Degree Chords',
+    };
+    
     function App() {
       const [level, setLevel] = useState(1);
       const [streak, setStreak] = useState(0);
       const [currentChord, setCurrentChord] = useState(() => getChord(1));
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
-      const [isCorrect, setIsCorrect] = useState(false);
+      const [showCorrectFlash, setShowCorrectFlash] = useState(false);
       const [synth, setSynth] = useState(null);
       const [showLeaderboard, setShowLeaderboard] = useState(false);
       const [leaderboardData, setLeaderboardData] = useState([]);
@@ -312,12 +323,15 @@
         const correctCount = correctNormalized.filter(n => selectedNormalized.includes(n)).length;
         const isCorrectNow = correctCount === correctNormalized.length && selectedNormalized.length === correctNormalized.length;
         
-        setIsCorrect(isCorrectNow);
         setShowFeedback(true);
         
         if (isCorrectNow) {
           const newStreak = streak + 1;
           setStreak(newStreak);
+          
+          // Show correct flash
+          setShowCorrectFlash(true);
+          setTimeout(() => setShowCorrectFlash(false), 800);
           
           // Level up every 8 correct answers
           if ((newStreak) % 8 === 0) {
@@ -326,25 +340,23 @@
           }
           
           playChord(currentChord.notes);
-          // Auto-advance after 1.5 seconds
+          // Auto-advance after 0.8 seconds (faster!)
           setTimeout(() => {
-            setShowFeedback(false);
             setSelectedNotes([]);
             setCurrentChord(getChord(level + 1));
-          }, 1500);
+          }, 800);
         } else {
+          setShowFeedback(true);
           setStreak(0);
           setGameEnded(true);
           setShowLeaderboard(true);
         }
-        setQuestionsAnswered(q => q + 1);
       };
       
       const handleNext = () => {
         setShowFeedback(false);
         setSelectedNotes([]);
-        const newChord = getChord(level + 1, currentChord.name);
-        setCurrentChord(newChord);
+        setCurrentChord(getChord(level + 1));
       };
       
       const startGame = () => {
@@ -357,6 +369,8 @@
       const closeLevelUp = () => {
         setShowLevelUp(false);
       };
+      
+      const currentLevel = Math.min(Math.ceil(level / 8), 5);
       
       const handlePreview = () => currentChord && playChord(currentChord.notes);
       
@@ -453,7 +467,7 @@
           
           <main>
             <div className="challenge-card">
-              <div className="level-badge">{LEVEL_NAMES[Math.min(Math.ceil(level/8), 4)]}</div>
+              <div className="level-badge">{LEVEL_NAMES[currentLevel]} - {LEVEL_DESCRIPTIONS[currentLevel]}</div>
               <div className="chord-name">{currentChord?.name}</div>
               <div className="chord-hint">Select all the notes in this chord</div>
             </div>
@@ -478,26 +492,22 @@
           </main>
           
           {showFeedback && (
-            <div className="feedback-overlay" onClick={!isCorrect ? handleNext : undefined}>
+            <div className="feedback-overlay" onClick={handleNext}>
               <div className="feedback-card">
-                <div className="feedback-icon">{isCorrect ? '✅' : '❌'}</div>
-                <div className={`feedback-title ${isCorrect ? 'correct' : 'wrong'}`}>
-                  {isCorrect ? 'Correct!' : 'Wrong!'}
+                <div className="feedback-icon">❌</div>
+                <div className="feedback-title wrong">Wrong!</div>
+                <div className="correct-notes">
+                  {currentChord?.notes.map(n => <span key={n} className="note-tag">{n}</span>)}
                 </div>
-                {!isCorrect && (
-                  <>
-                    <div className="correct-notes">
-                      {currentChord?.notes.map(n => <span key={n} className="note-tag">{n}</span>)}
-                    </div>
-                    <div className="feedback-explanation">
-                      {currentChord?.name} = {currentChord?.notes.join(' - ')}
-                    </div>
-                    <button className="btn-primary" onClick={handleNext}>Next</button>
-                  </>
-                )}
+                <div className="feedback-explanation">
+                  {currentChord?.name} = {currentChord?.notes.join(' - ')}
+                </div>
+                <button className="btn-primary" onClick={handleNext}>Next</button>
               </div>
             </div>
           )}
+          
+          {showCorrectFlash && <div className="correct-flash">✓</div>}
           
           {showLeaderboard && (
             <div className="leaderboard-modal">
