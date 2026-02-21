@@ -288,9 +288,9 @@
     const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert', 'Scale Degrees'];
     
     function getChord(level, lastChordName = '') {
-      // Level 1-8 = Beginner (CHORDS[1]), Level 9-16 = Intermediate (CHORDS[2]), etc.
-      const chordLevel = Math.min(Math.floor((level - 1) / 8) + 1, 5);
-      const chords = CHORDS[chordLevel];
+      // Level 1-8 = Beginner (index 0), Level 9-16 = Intermediate (index 1), etc.
+      const chordIndex = Math.floor((level - 1) / 8);
+      const chords = CHORDS[chordIndex + 1];
       // Don't repeat the same chord
       const available = chords.filter(c => c.name !== lastChordName);
       return available[Math.floor(Math.random() * available.length)];
