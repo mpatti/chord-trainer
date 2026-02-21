@@ -352,8 +352,12 @@
           
           // Level up every 8 correct answers
           if ((newStreak) % 8 === 0) {
-            setLevel(l => l + 1);
+            const newLevel = level + 1;
+            setLevel(newLevel);
             setShowLevelUp(true);
+            // Also advance to next chord pool immediately
+            setLastChordName(currentChord.name);
+            setCurrentChord(getChord(newLevel, currentChord.name));
           }
           
           playChord(currentChord.notes);
