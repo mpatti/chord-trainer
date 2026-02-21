@@ -387,8 +387,8 @@
             setCurrentChord(getChord(selectedDifficulty, currentChord.name));
           }, 800);
         } else {
+          // Save score before ending game
           setShowFeedback(true);
-          setStreak(0);
           setGameEnded(true);
           setShowLeaderboard(true);
         }
