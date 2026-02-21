@@ -129,6 +129,13 @@
     
     @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; transform: translate(-50%, -50%); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%); } }
     
+    @keyframes heartBreak {
+      0% { transform: scale(1); }
+      25% { transform: scale(1.3) rotate(-10deg); }
+      50% { transform: scale(1.2) rotate(10deg); opacity: 0.5; }
+      100% { transform: scale(0) rotate(45deg); opacity: 0; }
+    }
+    
     .piano-wrapper { display: flex; justify-content: center; margin: 30px 0; overflow-x: auto; }
     .piano { position: relative; width: 714px; height: 180px; }
     
@@ -377,6 +384,8 @@
       const [selectedDifficulty, setSelectedDifficulty] = useState(1);
       const [streak, setStreak] = useState(0);
       const [score, setScore] = useState(0);
+      const [lives, setLives] = useState(3);
+      const [lostLife, setLostLife] = useState(false);
       const [currentChord, setCurrentChord] = useState(null);
       const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
@@ -496,10 +505,21 @@
             setCurrentChord(getChord(selectedDifficulty, currentChord.name));
           }, 800);
         } else {
-          // Wrong answer - game over!
-          setShowFeedback(true);
-          setGameEnded(true);
-          return; // Stop here - don't advance
+          // Wrong answer - lose a life!
+          const newLives = lives - 1;
+          setLives(newLives);
+          setLostLife(true);
+          setTimeout(() => setLostLife(false), 500);
+          
+          if (newLives <= 0) {
+            // Game over - no more lives
+            setShowFeedback(true);
+            setGameEnded(true);
+          } else {
+            // Just wrong, let them try next chord
+            setSelectedNotes([]);
+          }
+          return;
         }
       };
       
@@ -558,6 +578,7 @@
       const restartGame = () => {
         setStreak(0);
         setScore(0);
+        setLives(3);
         setSelectedNotes([]);
         setShowFeedback(false);
         setGameEnded(false);
@@ -655,10 +676,21 @@
         <div className="container">
           <header>
             <div>
-              <h1>🎹 Chord Theory Trainer</h1>
+              <h1>🎹 Chordle</h1>
               <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>Playing as: {playerName}</div>
             </div>
             <div className="stats">
+              {/* Zelda-style hearts */}
+              <div style={{display: 'flex', gap: '8px', marginRight: '10px'}}>
+                {[0,1,2].map(i => (
+                  <span key={i} style={{
+                    fontSize: '1.5rem',
+                    opacity: i < lives ? 1 : 0.2,
+                    animation: lostLife && i === lives ? 'heartBreak 0.5s ease-out' : 'none',
+                    transition: 'all 0.3s ease'
+                  }}>❤️</span>
+                ))}
+              </div>
               <button className="leaderboard-btn" onClick={openLeaderboard}>🏆 Leaderboard</button>
               <button className="leaderboard-btn" onClick={() => setGameStarted(false)}>❌ Quit</button>
               <div className="stat">
