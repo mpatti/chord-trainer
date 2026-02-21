@@ -175,6 +175,28 @@
         { name: 'C11', notes: ['C', 'E', 'G', 'Bb', 'D', 'F'] },
         { name: 'Bm7b5', notes: ['B', 'D', 'F', 'A'] },
         { name: 'F7#11', notes: ['F', 'A', 'C', 'Eb', 'G', 'B'] },
+      ],
+      5: [  // Level 5: Scale degree chords (roman numeral context)
+        // ii chord in C major = Dm7
+        { name: 'Dm7 (ii in C)', notes: ['D', 'F', 'A', 'C'] },
+        // V7 chord in G major = D7
+        { name: 'D7 (V in G)', notes: ['D', 'F#', 'A', 'C'] },
+        // iii chord in Bb major = Dm
+        { name: 'Dm (iii in Bb)', notes: ['D', 'F', 'A'] },
+        // ii7b5 in Eb major = Cm7b5
+        { name: 'Cm7b5 (ii in Eb)', notes: ['C', 'Eb', 'Gb', 'Bb'] },
+        // IV chord in F major = Bb
+        { name: 'Bb (IV in F)', notes: ['Bb', 'D', 'F'] },
+        // V7 in C major = G7
+        { name: 'G7 (V in C)', notes: ['G', 'B', 'D', 'F'] },
+        // vi in A minor = F
+        { name: 'F (vi in A)', notes: ['F', 'A', 'C'] },
+        // I in D major = D
+        { name: 'D (I in D)', notes: ['D', 'F#', 'A'] },
+        // viiø in C major = Bm7b5
+        { name: 'Bm7b5 (vii in C)', notes: ['B', 'D', 'F', 'A'] },
+        // iii7 in G major = Bm7
+        { name: 'Bm7 (iii in G)', notes: ['B', 'D', 'F#', 'A'] },
       ]
     };
     
@@ -216,10 +238,10 @@
     
     const ALL_KEYS = [...WHITE_KEYS, ...BLACK_KEYS];
     
-    const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
+    const LEVEL_NAMES = ['', 'Beginner', 'Intermediate', 'Advanced', 'Expert', 'Scale Degrees'];
     
     function getChord(level) {
-      const chordLevel = Math.min(Math.ceil(level / 8), 4);
+      const chordLevel = Math.min(Math.ceil(level / 8), 5);
       const chords = CHORDS[chordLevel];
       return chords[Math.floor(Math.random() * chords.length)];
     }
