@@ -292,7 +292,8 @@
       };
       
       const handleNext = () => {
-        const wasLevelUp = questionsAnswered > 0 && questionsAnswered % 5 === 4 && questionsCorrect >= 3;
+        const nextQuestionCount = questionsAnswered + 1;
+        const wasLevelUp = nextQuestionCount % 5 === 0 && questionsCorrect >= 3;
         const newLevel = wasLevelUp ? level + 1 : level;
         
         setShowFeedback(false);
@@ -302,16 +303,12 @@
           setLevel(newLevel);
           setShowLevelUp(true);
           setQuestionsCorrect(0);
+        } else if (nextQuestionCount % 5 === 0) {
+          // Didn't pass, just reset
+          setQuestionsCorrect(0);
         }
         
-        if (questionsAnswered > 0 && questionsAnswered % 5 === 4) {
-          if (questionsCorrect >= 3) {
-            // Level up handled above
-          } else {
-            setQuestionsCorrect(0);
-          }
-        }
-        
+        setQuestionsAnswered(nextQuestionCount);
         setCurrentChord(getChord(newLevel));
       };
       
