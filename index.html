@@ -445,12 +445,12 @@
       
       const restartGame = () => {
         setStreak(0);
-        setCurrentChord(getChord(selectedDifficulty));
         setSelectedNotes([]);
         setShowFeedback(false);
         setGameEnded(false);
         setScoreSaved(false);
         setShowLeaderboard(false);
+        setGameStarted(false);
       };
       
       // Load saved name on mount
@@ -466,6 +466,7 @@
               <div className="start-screen">
                 <div className="start-title">🎹 Chord Theory Trainer</div>
                 <div className="start-subtitle">Choose your difficulty and get the highest streak!</div>
+                <button className="leaderboard-btn" style={{marginBottom: '20px'}} onClick={() => { fetchLeaderboard(); setShowLeaderboard(true); }}>🏆 View Leaderboard</button>
                 <input
                   type="text"
                   className="start-input"
@@ -595,9 +596,14 @@
                 )}
                 
                 {gameEnded && (
-                  <button className="btn-secondary" style={{width: '100%', marginTop: '15px'}} onClick={restartGame}>
-                    Play Again
-                  </button>
+                  <>
+                    <button className="btn-secondary" style={{width: '100%', marginTop: '15px'}} onClick={restartGame}>
+                      Play Again
+                    </button>
+                    <button className="btn-primary" style={{width: '100%', marginTop: '10px'}} onClick={() => { setShowLeaderboard(false); setGameStarted(false); }}>
+                      Choose Different Level
+                    </button>
+                  </>
                 )}
               </div>
             </div>
