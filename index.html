@@ -596,13 +596,13 @@
                   maxLength={20}
                 />
                 <div style={{marginTop: '20px'}}>
-                  <div style={{color: 'var(--text-secondary)', marginBottom: '10px'}}>Select Difficulty:</div>
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(1)} style={{...selectedDifficulty === 1 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', maxWidth: '300px'}}>Level 1: Triads (Beginner)</button>
-                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(2)} style={{...selectedDifficulty === 2 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', maxWidth: '300px'}}>Level 2: 7ths (Intermediate)</button>
-                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(3)} style={{...selectedDifficulty === 3 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', maxWidth: '300px'}}>Level 3: Altered + Half-Dim (Advanced)</button>
-                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(4)} style={{...selectedDifficulty === 4 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', maxWidth: '300px'}}>Level 4: All Types (Expert)</button>
-                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(5)} style={{...selectedDifficulty === 5 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', maxWidth: '300px'}}>Level 5: Scale Degrees</button>
+                  <div style={{color: 'var(--text-secondary)', marginBottom: '10px', textAlign: 'center'}}>Select Difficulty:</div>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center'}}>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(1)} style={{...selectedDifficulty === 1 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', width: '380px'}}>Level 1: Triads (Beginner)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(2)} style={{...selectedDifficulty === 2 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', width: '380px'}}>Level 2: 7ths (Intermediate)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(3)} style={{...selectedDifficulty === 3 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', width: '380px'}}>Level 3: Altered + Half-Dim (Advanced)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(4)} style={{...selectedDifficulty === 4 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', width: '380px'}}>Level 4: All Types (Expert)</button>
+                    <button className="btn-secondary" onClick={() => setSelectedDifficulty(5)} style={{...selectedDifficulty === 5 ? {borderColor: 'var(--accent)', borderWidth: '2px', borderStyle: 'solid', background: 'rgba(99,102,241,0.2)'} : {}, fontSize: '1.1rem', padding: '15px 20px', width: '380px'}}>Level 5: Scale Degrees</button>
                   </div>
                 </div>
                 <br />
