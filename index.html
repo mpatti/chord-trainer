@@ -307,7 +307,7 @@
     function App() {
       const [selectedDifficulty, setSelectedDifficulty] = useState(1);
       const [streak, setStreak] = useState(0);
-      const [currentChord, setCurrentChord] = useState(() => getChord(1, ''));
+      const [currentChord, setCurrentChord] = useState(null);
       const [lastChordName, setLastChordName] = useState('');
       const [selectedNotes, setSelectedNotes] = useState([]);
       const [showFeedback, setShowFeedback] = useState(false);
@@ -404,6 +404,7 @@
       const startGame = () => {
         if (playerName.trim()) {
           localStorage.setItem('chordTrainerName', playerName);
+          setCurrentChord(getChord(selectedDifficulty));
           setGameStarted(true);
         }
       };
