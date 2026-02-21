@@ -425,10 +425,14 @@
       
       const saveScore = async () => {
         if (!playerName.trim()) return;
+        console.log('Saving:', playerName, streak, selectedDifficulty);
         const { error } = await supabase
           .from('leaderboard')
           .insert([{ player_name: playerName, score: streak, level: selectedDifficulty }]);
-        if (!error) {
+        if (error) {
+          console.error('Save error:', error);
+          alert('Error saving score: ' + error.message);
+        } else {
           setScoreSaved(true);
           fetchLeaderboard();
         }
