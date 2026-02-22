@@ -630,12 +630,12 @@
         return (
           <div className="container">
             <main className={celebrate ? 'celebrate' : ''}>
+              {/* Discord link in top right */}
+              <a href="https://discord.gg/KVzqgHvXdd" target="_blank" rel="noopener noreferrer" title="Join the Musio Discord" style={{position: 'absolute', top: '15px', right: '15px', fontSize: '1.8rem', textDecoration: 'none'}}>💬</a>
+              
               <div className="start-screen">
                 <div className="start-title">🎹 Chordle</div>
                 <div className="start-subtitle">A Music Theory Game - Choose your difficulty and get the highest score!</div>
-                <a href="https://discord.gg/KVzqgHvXdd" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block', marginTop: '10px', marginBottom: '20px', padding: '12px 24px', background: '#5865F2', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '0.95rem'}}>
-                  💬 Join the Musio Discord
-                </a>
                 
                 <div className="leaderboard-section" style={{marginBottom: '20px', maxHeight: '200px', overflowY: 'auto', textAlign: 'left'}}>
                   <div style={{fontWeight: '600', marginBottom: '10px', textAlign: 'center'}}>🏆 Top Scores</div>
@@ -709,6 +709,9 @@
       
       return (
         <div className="container">
+          {/* Discord link in top right */}
+          <a href="https://discord.gg/KVzqgHvXdd" target="_blank" rel="noopener noreferrer" title="Join the Musio Discord" style={{position: 'absolute', top: '15px', right: '15px', fontSize: '1.8rem', textDecoration: 'none', zIndex: 10}}>💬</a>
+          
           <header>
             <div>
               <h1>🎹 Chordle</h1>
